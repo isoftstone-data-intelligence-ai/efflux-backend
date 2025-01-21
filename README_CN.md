@@ -50,7 +50,7 @@ Efflux 是一个基于大语言模型的 Agent 智能体对话客户端，提供
 
 1. 克隆项目
 ```bash
-git clone 
+git clone git@github.com:isoftstone-data-intelligence-ai/efflux-backend.git
 cd efflux-backend
 ```
 
