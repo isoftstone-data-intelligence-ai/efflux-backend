@@ -124,7 +124,7 @@ $(pwd)/.venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
 
-### 致谢
+### 致谢 
 
 本项目使用了以下优秀的开源项目和技术：
 
