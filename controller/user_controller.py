@@ -12,8 +12,7 @@ logger = get_logger(__name__)
 
 
 def get_user_service() -> UserService:
-    us = Container.user_service()  # 直接获取已注册的测试服务
-    return us
+    return Container.user_service()  # 直接获取已注册的测试服务
 
 
 def convert_to_user_result(users: List[User]) -> List[UserResult]:
