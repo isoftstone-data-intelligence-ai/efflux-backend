@@ -1,0 +1,20 @@
+#macos
+.DS_Store
+# Pycharm
+.idea
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+# App
+app.log
+
+# Alembic
+alembic/versions/*
+!alembic/versions/.gitkeep

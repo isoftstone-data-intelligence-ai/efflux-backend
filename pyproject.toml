@@ -1,0 +1,26 @@
+[project]
+name = "efflux"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.14.0",
+    "asyncpg>=0.30.0",
+    "colorlog>=6.9.0",
+    "dependency-injector>=4.44.0",
+    "fastapi>=0.115.6",
+    "greenlet>=3.1.1",
+    "langchain-openai>=0.2.12",
+    "langchain>=0.3.11",
+    "mcp>=1.1.1",
+    "openai>=1.57.2",
+    "python-dotenv>=1.0.1",
+    "sqlalchemy>=2.0.36",
+    "bcrypt>=4.2.1",
+    "passlib>=1.7.4",
+    "python-multipart>=0.0.19",
+    "PyJWT>=2.10.1",
+    "langgraph>=0.2.59",
+    "jsonschema-pydantic>=0.6",
+]
