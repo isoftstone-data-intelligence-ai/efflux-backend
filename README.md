@@ -39,7 +39,7 @@ Efflux is an LLM-based Agent chat client featuring streaming responses and chat 
 
 1. Clone the project
 ```bash
-git clone git@github.com:isoftstone-data-intelligence-ai/efflux-backend.git
+git clone 
 cd efflux-backend
 ```
 
