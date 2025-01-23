@@ -64,7 +64,16 @@ pip install uv
 uv sync --reinstall
 ```
 
-4. 配置环境变量
+4. 激活虚拟环境
+```bash
+# 激活虚拟环境
+source .venv/bin/activate   # MacOS/Linux
+
+# 退出虚拟环境（当需要时）
+deactivate
+```
+
+5. 配置环境变量
 ```bash
 # 复制环境变量模板
 cp .env.sample .env
@@ -74,7 +83,7 @@ cp .env.sample .env
 # 2. 至少一个大语言模型的配置（如 Azure OpenAI、通义千问、豆包或月之暗面）
 ```
 
-5. 选择使用的大模型
+6. 选择使用的大模型
 ```bash
 # 编辑 core/common/container.py 文件
 # 找到 llm 的注册部分，根据需要替换为以下任一模型（默认使用通义千问）：
@@ -89,7 +98,7 @@ from core.llm.azure_open_ai import AzureLlm
 llm = providers.Singleton(AzureLlm)
 ```
 
-6. 启动 postgres 数据库
+7. 启动 postgres 数据库
 ```bash
 # 方法一：如果你本地已安装 PostgreSQL
 # 直接启动本地的 PostgreSQL 服务即可
@@ -105,7 +114,7 @@ docker run -d --name local-postgres \
 # 注意：无论使用哪种方式，请确保数据库的连接信息与 .env 文件中的配置保持一致
 ```
 
-7. 初始化数据库
+8. 初始化数据库
 ```bash
 # 创建一个新的版本，并在alembic/versions下创建一个修改数据结构版本的py文件
 alembic revision --autogenerate -m "initial migration"
@@ -117,10 +126,9 @@ alembic upgrade head --sql
 alembic upgrade head
 ```
 
-8. 启动服务
+9. 启动服务
 ```bash
-# 使用项目虚拟环境的 Python 启动服务
-$(pwd)/.venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000
+python -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
 

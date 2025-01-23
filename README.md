@@ -53,7 +53,16 @@ pip install uv
 uv sync --reinstall
 ```
 
-4. Configure environment variables
+4. Activate virtual environment
+```bash
+# Activate virtual environment
+source .venv/bin/activate   # MacOS/Linux
+
+# Deactivate when needed
+deactivate
+```
+
+5. Configure environment variables
 ```bash
 # Copy environment variable template
 cp .env.sample .env
@@ -63,7 +72,7 @@ cp .env.sample .env
 # 2. At least one LLM configuration (e.g., Azure OpenAI, Qwen, Doubao, or Moonshot)
 ```
 
-5. Select the LLM
+6. Select the LLM
 ```bash
 # Edit core/common/container.py file
 # Find the llm registration section, replace with any of the following models (Qwen by default):
@@ -78,7 +87,7 @@ from core.llm.azure_open_ai import AzureLlm
 llm = providers.Singleton(AzureLlm)
 ```
 
-6. Start PostgreSQL database
+7. Start PostgreSQL database
 ```bash
 # Method 1: If PostgreSQL is installed locally
 # Simply start your local PostgreSQL service
@@ -94,7 +103,7 @@ docker run -d --name local-postgres \
 # Note: Ensure database connection info matches the configuration in your .env file
 ```
 
-7. Initialize database
+8. Initialize database
 ```bash
 # Create a new version and generate a migration file in alembic/versions
 alembic revision --autogenerate -m "initial migration"
@@ -106,10 +115,9 @@ alembic upgrade head --sql
 alembic upgrade head
 ```
 
-8. Start the service
+9. Start the service
 ```bash
-# Start service using Python from project virtual environment
-$(pwd)/.venv/bin/python -m uvicorn main:app --host 0.0.0.0 --port 8000
+python -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
 ### Acknowledgments
