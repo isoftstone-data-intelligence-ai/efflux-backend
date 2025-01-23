@@ -15,6 +15,9 @@ wheels/
 # App
 app.log
 
+# .env
+.env
+
 # Alembic
 alembic/versions/*
 !alembic/versions/.gitkeep
