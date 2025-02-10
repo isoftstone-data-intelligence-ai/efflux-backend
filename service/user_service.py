@@ -3,6 +3,8 @@ from core.common.logger import logger
 from passlib.hash import bcrypt
 from model.user import User
 from typing import List
+from exception.exception import BaseAPIException
+from exception.exception_dict import ExceptionType
 
 
 @logger
@@ -17,6 +19,12 @@ class UserService:
         return users
 
     async def create_user(self, name: str, email: str, password: str):
+        user = await self.get_user_by_name(name)
+        if user:
+            raise BaseAPIException(
+                status_code=ExceptionType.DUPLICATE_USER_NAME.code,
+                detail=ExceptionType.DUPLICATE_USER_NAME.message
+            )
         hashed_password = bcrypt.hash(password)
         return await self.user_dao.create_user(name, email, hashed_password)
 
