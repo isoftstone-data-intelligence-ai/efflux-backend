@@ -10,6 +10,13 @@ class UserResult(BaseModel):
     name: str
     email: str
 
+    def model_dump(self, **kwargs):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "email": self.email,
+        }
+
 class Token(BaseModel):
     access_token: str
     token_type: str

@@ -1,6 +1,8 @@
 from dao.user_dao import UserDAO
 from core.common.logger import logger
 from passlib.hash import bcrypt
+
+from dto.user_dto import UserResult
 from model.user import User
 from typing import List
 from exception.exception import BaseAPIException
@@ -32,10 +34,19 @@ class UserService:
                 detail=ExceptionType.DUPLICATE_EMAIL.message
             )
         hashed_password = bcrypt.hash(password)
-        return await self.user_dao.create_user(name, email, hashed_password)
+        created_user = await self.user_dao.create_user(name, email, hashed_password)
+        return await self.convert_model_to_user_result(created_user)
 
     async def get_user_by_name(self, user_name) -> User:
         return await self.user_dao.get_user_by_name(user_name)
 
     async def get_user_by_email(self, email) -> User:
         return await self.user_dao.get_user_by_email(email)
+
+    @staticmethod
+    async def convert_model_to_user_result(user: User) -> UserResult:
+        return UserResult(
+            id=user.id,
+            name=user.name,
+            email=user.email,
+        )

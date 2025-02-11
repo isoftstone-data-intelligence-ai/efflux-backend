@@ -1,6 +1,8 @@
 from sqlalchemy.future import select
 from model.user import User
 from typing import List
+from datetime import datetime
+
 
 class UserDAO:
     def __init__(self, session_factory):
@@ -9,13 +11,12 @@ class UserDAO:
 
     async def get_all_users(self) -> List[User]:
         async with self._session_factory() as session:  # 获取会话
-            result = await session.execute(select(User)) # 得到Result对象
-            return result.scalars().all() # 使用Result.scalars将元组列表转为List[User]
-
+            result = await session.execute(select(User))  # 得到Result对象
+            return result.scalars().all()  # 使用Result.scalars将元组列表转为List[User]
 
     async def create_user(self, name: str, email: str, password: str):
         async with self._session_factory() as session:
-            new_user = User(name=name, email=email, password=password)
+            new_user = User(name=name, email=email, password=password, create_time=datetime.now())
             session.add(new_user)
             await session.commit()
             return new_user
