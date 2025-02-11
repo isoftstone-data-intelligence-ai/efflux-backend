@@ -20,7 +20,7 @@ def convert_to_user_result(users: List[User]) -> List[UserResult]:
     return [UserResult(id=user.id, name=user.name, email=user.email) for user in users]
 
 
-@router.get("/users", summary="用户列表", response_model=List[UserResult])
+@router.get("/list", summary="用户列表", response_model=List[UserResult])
 async def list_users(user_service: UserService = Depends(get_user_service)):
     """
     List all users 用户列表
