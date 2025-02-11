@@ -34,7 +34,7 @@ app.add_middleware(
     AuthMiddleware,
     secret_key=SECRET_KEY,
     algorithm=ALGORITHM,
-    exclude_paths=["/auth/login"]
+    exclude_paths=["/auth/login", "/user/user", "docs"]
 )
 
 app.include_router(chat_controller.router)
