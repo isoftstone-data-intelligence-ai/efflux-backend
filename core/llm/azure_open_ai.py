@@ -46,7 +46,7 @@ class AzureLlm(LLMChat):
             Union[LanguageModelLike, None]: 返回一个 AzureChatOpenAI 实例，用于流式生成响应。
         """
         return AzureChatOpenAI(
-            deployment_name=os.environ['DEPLOYMENT_NAME'],  # Azure 部署名称
+            # deployment_name=os.environ['DEPLOYMENT_NAME'],  # Azure 部署名称
             openai_api_key=os.environ['AZURE_API_KEY'],      # Azure OpenAI API 密钥
             azure_endpoint=os.environ['AZURE_ENDPOINT'],     # Azure 服务端点
             openai_api_version=os.environ['AZURE_API_VERSION'],  # Azure OpenAI API 版本
