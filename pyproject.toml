@@ -24,4 +24,5 @@ dependencies = [
     "langgraph>=0.2.59",
     "jsonschema-pydantic>=0.6",
     "langchain-ollama>=0.2.3",
+    "python-jose[cryptography]>=3.3.0",
 ]

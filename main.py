@@ -2,6 +2,8 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from exception.exception import global_exception_handlers
 from controller import chat_controller, user_controller, login_controller, mcp_controller, chat_window_controller
+import configparser
+from core.security.middleware import AuthMiddleware
 
 app = FastAPI(exception_handlers=global_exception_handlers)
 
@@ -20,6 +22,19 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],  # 允许所有方法
     allow_headers=["*"],  # 允许所有头
+)
+
+# config
+config_file = "config.ini"
+config = configparser.ConfigParser()
+config.read(config_file)
+SECRET_KEY = config['SECURITY']['SECRET_KEY']
+ALGORITHM = config['SECURITY']['ALGORITHM']
+app.add_middleware(
+    AuthMiddleware,
+    secret_key=SECRET_KEY,
+    algorithm=ALGORITHM,
+    exclude_paths=["/auth/login", "/user/user", "/docs"]
 )
 
 app.include_router(chat_controller.router)
