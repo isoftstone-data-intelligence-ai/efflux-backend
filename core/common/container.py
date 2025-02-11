@@ -8,8 +8,11 @@ from service.chat_service import ChatService
 from service.chat_window_service import ChatWindowService
 from service.mcp_config_service import MCPConfigService
 from service.user_service import UserService
-from core.llm.qwen_open_ai import QwenLlm
-
+from core.llm.azure_open_ai import AzureLlm
+# from core.llm.qwen_open_ai import QwenLlm
+# from core.llm.moonshot_open_ai import MoonshotLlm
+# from core.llm.doubao_open_ai import DoubaoLlm
+# from core.llm.ollama_llm import OllamaLlm
 
 class Container(containers.DeclarativeContainer):
     # 注册数据库会话提供器
@@ -31,7 +34,7 @@ class Container(containers.DeclarativeContainer):
     chat_window_service = providers.Singleton(ChatWindowService, chat_window_dao=chat_window_dao)
 
     # 注册模型
-    llm = providers.Singleton(QwenLlm)
+    llm = providers.Singleton(AzureLlm)
 
     # 注册 chat Service
     chat_service = providers.Singleton(ChatService, llm=llm, mcp_config_service=mcp_config_service, chat_window_dao=chat_window_dao)
