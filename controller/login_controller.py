@@ -45,7 +45,7 @@ def get_password_hash(password):
 # 验证用户
 async def authenticate_user(username: str,
                             password: str,
-                            user_service: UserService = Depends(get_user_service)):
+                            user_service: UserService):
     user = await user_service.get_user_by_name(username)
     if not user:
         return False
@@ -60,14 +60,15 @@ async def create_access_token(data: dict, expires_delta: timedelta | None = None
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=150)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
 # 登录成功，颁发令牌
-async def login_for_access_token(username: str, password: str) -> Token:
-    user = await authenticate_user(username, password)
+async def login_for_access_token(username: str, password: str,
+                            user_service: UserService) -> Token:
+    user = await authenticate_user(username, password, user_service)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -75,16 +76,24 @@ async def login_for_access_token(username: str, password: str) -> Token:
             headers={"WWW-Authenticate": "Bearer"},
         )
     access_token_expires = timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
+    # 包含更多用户信息
+    user_info = {
+        "sub": user.name,  # 用户名
+        "name": user.name,
+        "email": user.email,
+        "id": user.id,
+        # 添加其他需要的信息
+    }
     access_token = await create_access_token(
-        data={"sub": user.name}, expires_delta=access_token_expires
+        data=user_info, expires_delta=access_token_expires
     )
     return Token(access_token=access_token, token_type="bearer")
 
 
 # 登录接口
 @router.post("/login", summary="登录")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> Token:
-    return await login_for_access_token(form_data.username, form_data.password)
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), user_service: UserService = Depends(get_user_service)) -> Token:
+    return await login_for_access_token(form_data.username, form_data.password, user_service)
 
 
 # 登出接口 需要token

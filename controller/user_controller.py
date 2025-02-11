@@ -5,6 +5,7 @@ from service.user_service import UserService
 from typing import List
 from core.common.logger import get_logger
 from model.user import User
+from core.security.middleware import request_token_context
 
 router = APIRouter(prefix="/user", tags=["Users"])
 
@@ -38,3 +39,9 @@ async def create_user(user: UserInit, user_service: UserService = Depends(get_us
     rs = await user_service.create_user(user.name, user.email, user.password)
     logger.error(rs)
     return rs
+
+@router.get("/tokeninfo", summary="用户token信息", response_model=UserResult)
+async def read_user_token_info():
+    # 获取当前线程/协程内的token信息
+    user_info = request_token_context.get()
+    return user_info
