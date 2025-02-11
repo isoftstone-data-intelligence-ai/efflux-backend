@@ -11,6 +11,7 @@ class ExceptionType(Enum):
     SERVER_DELETE_FAILED = (8, "服务器删除失败")
     DUPLICATE_SERVER_NAME = (9, "服务器名称已存在")
     DUPLICATE_USER_NAME = (10, "用户名已存在")
+    DUPLICATE_EMAIL = (11, "邮箱已存在")
     # 追加自定义异常
 
 

@@ -25,8 +25,17 @@ class UserService:
                 status_code=ExceptionType.DUPLICATE_USER_NAME.code,
                 detail=ExceptionType.DUPLICATE_USER_NAME.message
             )
+        user = await self.get_user_by_email(email)
+        if user:
+            raise BaseAPIException(
+                status_code=ExceptionType.DUPLICATE_EMAIL.code,
+                detail=ExceptionType.DUPLICATE_EMAIL.message
+            )
         hashed_password = bcrypt.hash(password)
         return await self.user_dao.create_user(name, email, hashed_password)
 
     async def get_user_by_name(self, user_name) -> User:
         return await self.user_dao.get_user_by_name(user_name)
+
+    async def get_user_by_email(self, email) -> User:
+        return await self.user_dao.get_user_by_email(email)

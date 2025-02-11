@@ -24,3 +24,8 @@ class UserDAO:
         async with self._session_factory() as session:
             result = await session.execute(select(User).where(User.name == user_name))
             return result.scalars().first()
+
+    async def get_user_by_email(self, email: str) -> User:
+        async with self._session_factory() as session:
+            result = await session.execute(select(User).where(User.email == email))
+            return result.scalars().first()
