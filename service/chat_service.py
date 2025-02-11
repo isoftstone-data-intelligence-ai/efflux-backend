@@ -103,26 +103,31 @@ class ChatService:
         Returns:
             dict: 拼装好的模型输入，包含消息列表。
         """
-        # 初始化消息列表
+        # 初始化一个空的消息列表，用于存储所有要发送给模型的消息
         messages = []
-        # 如果有提示词，加入系统提示
+        # 检查是否有系统提示词（prompt）
+        # 如果有，将其作为 system 角色的消息添加到列表中
         if chat_dto.prompt:
             messages.append(("system", chat_dto.prompt))
 
         # 添加最近 3 条用户历史记录
         if chat_dto.user_id in self.user_history_dict:
             for record in self.user_history_dict[chat_dto.user_id][-3:]:
-                messages.append(("user", record["user"]))
-                messages.append(("assistant", record["assistant"]))
+                # 每条历史记录都包含用户的问题和 AI 的回答
+                # 按照时间顺序添加到消息列表中
+                messages.append(("user", record["user"]))  # 用户的历史问题
+                messages.append(("assistant", record["assistant"]))  # AI 的历史回答
 
-        # 添加当前用户的问题
+        # 将当前用户的新问题添加到消息列表的最后
         messages.append(("user", chat_dto.query))
 
-        # 打印即将发送给模型的消息
+        # 调试用：打印所有将要发送给模型的消息
         print(">>> 模型输入 messages：")
         for role, content in messages:
             print(f"{role}: {content}")
 
+        # 返回一个包含所有消息的字典
+        # 这个格式是 LLM API 所需的标准格式
         return {"messages": messages}
 
     async def create_chat(self, user_id: int, query: str, chat_messages: Optional[List[str]] = None) -> int:
