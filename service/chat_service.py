@@ -31,7 +31,7 @@ class ChatService:
         self.mcp_config_service = mcp_config_service
         self.user_history_dict = {}  # 用于存储每个用户的历史会话记录
 
-    async def agent_stream(self, chat_dto: ChatDTO) -> AsyncGenerator[str, None]:
+    async def agent_stream(self, chat_dto: ChatDTO, user_id: int) -> AsyncGenerator[str, None]:
         """
         langchain 流式代理方法
 
@@ -39,13 +39,13 @@ class ChatService:
 
         Args:
             chat_dto (ChatDTO): 会话请求数据传输对象，包含用户 ID、问题、提示词等。
-
+            user_id : 用户id，从token中获取
         Yields:
             str: 模型返回的流式会话响应，每次生成一个 JSON 格式的消息块。
         """
         # 判断是否需要创建会话
         if not chat_dto.chat_id:
-            new_chat_window_id = await self.create_chat(chat_dto.user_id, chat_dto.query)
+            new_chat_window_id = await self.create_chat(user_id, chat_dto.query)
         # 初始化 langchain agent 工具列表
         tools = []
         if chat_dto.server_id:
@@ -60,7 +60,6 @@ class ChatService:
 
         # 定义回调方法，用于收集模型返回的数据
         async def data_callback(collected_data):
-            user_id = chat_dto.user_id
             user_query = chat_dto.query
             print("--->messages:", ''.join(collected_data["messages"]))
             if "messages" in collected_data and collected_data["messages"]:

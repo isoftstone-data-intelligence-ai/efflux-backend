@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from core.common.container import Container
+from core.security.middleware import request_token_context
 from dto.chat_dto import ChatDTO
 from service.chat_service import ChatService
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
+
 
 # 从容器中获取注册在容器中的 ChatService 实例
 def get_chat_service() -> ChatService:
@@ -33,10 +35,12 @@ async def stream_response(chat_dto: ChatDTO, chat_service: ChatService = Depends
     Returns:
         StreamingResponse: 流式响应对象，媒体类型为 text/event-stream
     """
+    user_id = request_token_context.get().get("user_id")
     return StreamingResponse(
-        chat_service.agent_stream(chat_dto),
+        chat_service.agent_stream(chat_dto, user_id),
         media_type="text/event-stream"
     )
+
 
 @router.post("/normal_chat", summary="普通会话")
 async def normal_chat(chat_dto: ChatDTO, chat_service: ChatService = Depends(get_chat_service)):

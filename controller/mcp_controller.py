@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from core.common.container import Container
+from core.security.middleware import request_token_context
 from dto.global_response import GlobalResponse
 from dto.mcp_server_dto import MCPServerDTO, CreateMCPServerDTO
 from service.mcp_config_service import MCPConfigService
@@ -34,6 +35,8 @@ async def add_server(
         server: CreateMCPServerDTO,
         mcp_config_service: MCPConfigService = Depends(get_mcp_config_service)
 ) -> GlobalResponse:
+    user_id = request_token_context.get().get("user_id")
+    server.user_id = user_id
     new_server = await mcp_config_service.add_server(server)
     return result_utils.build_response(new_server)
 
