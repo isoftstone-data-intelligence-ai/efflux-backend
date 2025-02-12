@@ -4,11 +4,14 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from core.common.logger import get_logger
 from core.common.container import Container
+from dto.global_response import GlobalResponse
 from dto.user_dto import Token
 from service.user_service import UserService
 from passlib.context import CryptContext
 import configparser
 import jwt
+
+from utils import result_utils
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 # 显示创建日志
@@ -92,8 +95,9 @@ async def login_for_access_token(username: str, password: str,
 
 # 登录接口
 @router.post("/login", summary="登录")
-async def login(form_data: OAuth2PasswordRequestForm = Depends(), user_service: UserService = Depends(get_user_service)) -> Token:
-    return await login_for_access_token(form_data.username, form_data.password, user_service)
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), user_service: UserService = Depends(get_user_service)) -> GlobalResponse:
+    token = await login_for_access_token(form_data.username, form_data.password, user_service)
+    return result_utils.build_response(token)
 
 
 # 登出接口 需要token
