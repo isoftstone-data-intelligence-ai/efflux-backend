@@ -36,21 +36,26 @@ class LLMChat(ABC):
         """
 
     @abstractmethod
-    def name(self) -> Union[str, None]:
+    def name(self) -> Optional[str]:
         """
         获取聊天模块的名称。
 
         Returns:
-            Union[str, None]: 聊天模块的名称或None如果未指定。
+            Optional[str]: 聊天模块的名称或None如果未指定。
         """
 
     @abstractmethod
-    def get_llm_model(self) -> Union[LanguageModelLike, None]:
+    def get_llm_model(self, api_key: str, base_url: str, model: str) -> Optional[LanguageModelLike]:
         """
         获取当前使用的语言模型。
 
+        Args:
+            api_key (str): API密钥
+            base_url (str): API Base URL
+            model (str): 模型名称
+
         Returns:
-            Union[LanguageModelLike, None]: 语言模型实例或None如果未指定。
+            Optional[LanguageModelLike]: 语言模型实例或None如果未指定。
         """
 
     async def stream_chat(self, inputs: Union[dict[str, Any], Any], tools: List[BaseTool], callback=None) -> \
