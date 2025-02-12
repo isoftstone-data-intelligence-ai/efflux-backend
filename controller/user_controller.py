@@ -40,7 +40,6 @@ async def create_user(user: UserInit, user_service: UserService = Depends(get_us
     :user: 用户初始信息
     """
     rs = await user_service.create_user(user.name, user.email, user.password)
-    logger.error(rs)
     return result_utils.build_response(rs)
 
 @router.get("/tokeninfo", summary="用户token信息", response_model=UserResult)

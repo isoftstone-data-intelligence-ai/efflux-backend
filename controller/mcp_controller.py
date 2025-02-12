@@ -14,9 +14,11 @@ def get_mcp_config_service() -> MCPConfigService:
     return mcp_config_service
 
 
-@router.get("/mcp_server_list/{user_id}")
-async def mcp_server_list(user_id: int, mcp_config_service: MCPConfigService = Depends(get_mcp_config_service)) \
+@router.get("/mcp_server_list")
+async def mcp_server_list(mcp_config_service: MCPConfigService = Depends(get_mcp_config_service)) \
         -> GlobalResponse:
+    # token中获取user_id
+    user_id = request_token_context.get().get("user_id")
     mcp_servers = await mcp_config_service.get_user_servers(user_id)
     return result_utils.build_response(mcp_servers)
 
@@ -35,6 +37,7 @@ async def add_server(
         server: CreateMCPServerDTO,
         mcp_config_service: MCPConfigService = Depends(get_mcp_config_service)
 ) -> GlobalResponse:
+    # token中获取user_id
     user_id = request_token_context.get().get("user_id")
     server.user_id = user_id
     new_server = await mcp_config_service.add_server(server)
@@ -46,6 +49,8 @@ async def update_server(
         server: MCPServerDTO,
         mcp_config_service: MCPConfigService = Depends(get_mcp_config_service)
 ) -> GlobalResponse:
+    user_id = request_token_context.get().get("user_id")
+    server.user_id = user_id
     updated_server = await mcp_config_service.update_server(server)
     return result_utils.build_response(updated_server)
 
