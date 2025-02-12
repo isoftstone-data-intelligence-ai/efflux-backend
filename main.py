@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from exception.exception import global_exception_handlers
 from controller import chat_controller, user_controller, login_controller, mcp_controller, chat_window_controller
