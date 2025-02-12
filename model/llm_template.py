@@ -9,9 +9,9 @@ class LlmTemplate(Base):
     id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
     provider = Column(String(50), nullable=False)  # 模型提供商名称 (azure, qwen, doubao, moonshot, ollama)
     model_name = Column(String(100), nullable=False)  # 展示给用户的 Model 名称
-    api_key_variable = Column(String(50))  # 存储 API Key 的配置变量名 (如: API_KEY)
-    base_url_variable = Column(String(50))  # 存储 Base URL/Endpoint 的配置变量名 (如: BASE_URL, ENDPOINT, etc)
-    model_variable = Column(String(50))  # 存储模型名称/版本号的配置变量名 (如: MODEL, API_VERSION, etc)
+    api_key_variable = Column(String(50), default='API Key')  # 存储 API Key 的配置变量名 (如: API_KEY)
+    base_url_variable = Column(String(50), default='Base URL')  # 存储 Base URL/Endpoint 的配置变量名 (如: BASE_URL, ENDPOINT, etc)
+    model_variable = Column(String(50), default='Model')  # 存储模型名称/版本号的配置变量名 (如: MODEL, API_VERSION, etc)
 
     def model_dump(self) -> dict:
         """将模型序列化为字典"""
