@@ -1,5 +1,5 @@
 from extensions.ext_database import Base
-from sqlalchemy import Column, JSON, TIMESTAMP, BigInteger, String, Boolean
+from sqlalchemy import Column, JSON, TIMESTAMP, BigInteger, String, Boolean, ForeignKey
 from datetime import datetime
 
 class LlmConfig(Base):
@@ -9,10 +9,11 @@ class LlmConfig(Base):
 
     id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
     user_id = Column(BigInteger, nullable=False, index=True)
+    template_id = Column(BigInteger, ForeignKey('llm_template.id'), nullable=False)
     provider = Column(String(50), nullable=False)  # 模型提供商名称 (azure, qwen, doubao, moonshot, ollama)
     api_key = Column(String(200), nullable=False)
     base_url = Column(String(500), nullable=False)
-    model = Column(String(100), nullable=False)  # 模型名称 (azure: deployment name, qwen: qwen-max等, doubao/moonshot: ep-xxx, ollama: deepseek-r1:8b等)
+    model = Column(String(100), nullable=False)  # 模型信息 (open ai: gpt-4o, azure: api version, qwen: qwen-max等, doubao/moonshot: ep-xxx, ollama: deepseek-r1:8b等)
     extra_config = Column(JSON, nullable=True)  # 额外配置参数（如temperature等）
     created_at = Column(TIMESTAMP(timezone=True), nullable=True, default=datetime.now)
     updated_at = Column(TIMESTAMP(timezone=True), nullable=True, default=datetime.now, onupdate=datetime.now)
@@ -22,6 +23,7 @@ class LlmConfig(Base):
         return {
             "id": self.id,
             "user_id": self.user_id,
+            "template_id": self.template_id,
             "provider": self.provider,
             "api_key": self.api_key,
             "base_url": self.base_url,

@@ -33,6 +33,7 @@ class LlmConfigDAO:
 
     async def create_config(self,
                           user_id: int,
+                          template_id: int,
                           provider: str,
                           api_key: str,
                           base_url: str,
@@ -42,6 +43,7 @@ class LlmConfigDAO:
         
         Args:
             user_id: 用户ID
+            template_id: 模板ID
             provider: 模型提供商名称
             api_key: API密钥
             base_url: API基础URL
@@ -51,6 +53,7 @@ class LlmConfigDAO:
         async with self._session_factory() as session:
             new_config = LlmConfig(
                 user_id=user_id,
+                template_id=template_id,
                 provider=provider,
                 api_key=api_key,
                 base_url=base_url,
@@ -65,6 +68,7 @@ class LlmConfigDAO:
 
     async def update_config(self,
                           id: int,
+                          template_id: Optional[int] = None,
                           provider: Optional[str] = None,
                           api_key: Optional[str] = None,
                           base_url: Optional[str] = None,
@@ -73,6 +77,8 @@ class LlmConfigDAO:
         """更新 LLM 配置信息"""
         async with self._session_factory() as session:
             update_data = {}
+            if template_id is not None:
+                update_data['template_id'] = template_id
             if provider is not None:
                 update_data['provider'] = provider
             if api_key is not None:
