@@ -56,3 +56,26 @@ async def add_config(
     return result_utils.build_response(new_config)
 
 
+@router.put("/config")
+async def update_config(
+    config: LLMConfigDTO,
+    llm_service: LLMService = Depends(get_llm_service)
+) -> GlobalResponse:
+    """更新 LLM 配置"""
+    user_id = request_token_context.get().get("user_id")
+    config.user_id = user_id
+    updated_config = await llm_service.update_config(config)
+    return result_utils.build_response(updated_config)
+
+
+# @router.delete("/config/{_id}")
+# async def delete_config(
+#     _id: int,
+#     llm_service: LLMService = Depends(get_llm_service)
+# ) -> GlobalResponse:
+#     """删除 LLM 配置"""
+#     await llm_service.delete_config(_id)
+#     return result_utils.build_response(None)
+
+
+
