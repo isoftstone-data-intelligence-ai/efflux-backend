@@ -1,5 +1,9 @@
 from dependency_injector import containers, providers
 
+from core.llm.claude import ClaudeLlm
+from core.llm.llm_manager import LLMManager
+from core.llm.ollama import OllamaLlm
+from core.llm.open_ai import OpenAILlm
 from dao.llm_config_dao import LlmConfigDAO
 from dao.llm_template_dao import LlmTemplateDAO
 from extensions.ext_database import DatabaseProvider
@@ -11,10 +15,7 @@ from service.chat_window_service import ChatWindowService
 from service.mcp_config_service import MCPConfigService
 from service.user_service import UserService
 from core.llm.azure_open_ai import AzureLlm
-# from core.llm.qwen_open_ai import QwenLlm
-# from core.llm.moonshot_open_ai import MoonshotLlm
-# from core.llm.doubao_open_ai import DoubaoLlm
-# from core.llm.ollama_llm import OllamaLlm
+
 
 class Container(containers.DeclarativeContainer):
     # 注册数据库会话提供器
@@ -40,17 +41,25 @@ class Container(containers.DeclarativeContainer):
     # 注册llm_template DAO
     llm_template_dao = providers.Singleton(LlmTemplateDAO, session_factory=database_provider.provided.session_factory)
 
+    azure = AzureLlm()
+    claude = ClaudeLlm()
+    ollama = OllamaLlm()
+    open_ai = OpenAILlm()
+
+    llm_map = {
+        azure.name(): azure,
+        claude.name(): claude,
+        ollama.name(): ollama,
+        open_ai.name(): open_ai,
+    }
     # 注册LLM Manager
-    llm_manager = providers.Singleton(LLMManager, )
-
-
-    # 注册模型
-    llm = providers.Singleton(AzureLlm)
+    llm_manager = providers.Singleton(LLMManager, llm_map)
 
     # 注册 chat Service
     chat_service = providers.Singleton(ChatService,
                                        mcp_config_service=mcp_config_service,
                                        chat_window_dao=chat_window_dao,
-                                       llm_config_dao=LlmConfigDAO)
+                                       llm_config_dao=LlmConfigDAO,
+                                       llm_manager=llm_manager)
 
 

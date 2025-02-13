@@ -43,7 +43,7 @@ class OpenAILlm(LLMChat):
             Exception: 当创建 ChatOpenAI 实例时发生错误
         """
         try:
-            return ChatOpenAI(
+             return ChatOpenAI(
                 api_key=api_key,      # API 密钥
                 base_url=base_url,    # API Base URL
                 model=model,          # 使用的模型名称

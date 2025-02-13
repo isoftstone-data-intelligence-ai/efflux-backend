@@ -20,7 +20,7 @@ class ChatService:
     """
 
     def __init__(self, mcp_config_service: MCPConfigService, chat_window_dao: ChatWindowDAO,
-                 llm_config_dao: LlmConfigDAO):
+                 llm_config_dao: LlmConfigDAO, llm_manager: LLMManager):
         """
         初始化 ChatService
 
@@ -33,6 +33,7 @@ class ChatService:
         self.chat_window_dao = chat_window_dao
         self.llm_config_dao = llm_config_dao
         self.mcp_config_service = mcp_config_service
+        self.llm_manager = llm_manager
         self.user_history_dict = {}  # 用于存储每个用户的历史会话记录
 
     async def agent_stream(self, chat_dto: ChatDTO, user_id: int) -> AsyncGenerator[str, None]:
@@ -90,15 +91,15 @@ class ChatService:
         # 构造模型的输入内容
         inputs = await self.load_inputs(chat_dto)
 
+        # 模型选择
         user_llm_config_id = 1
         user_llm_config: LlmConfig = await self.llm_config_dao.get_config_by_id(user_llm_config_id)
-        llm_nick_name = user_llm_config.nick_name
-        llm_original = LLMManager.get_llm(name=llm_nick_name)
-        llm = llm_original.get_llm_model(user_llm_config.api_key,user_llm_config.base_url,user_llm_config.model)
+        llm_nick_name = user_llm_config.model_nickname
+        llm_chat = self.llm_manager.get_llm(llm_nick_name)
 
 
         # 调用语言模型的流式接口，生成响应
-        async for chunk in llm.stream_chat(inputs=inputs, tools=tools, callback=data_callback):
+        async for chunk in llm_chat.stream_chat(inputs=inputs, tools=tools, callback=data_callback):
             yield json.dumps(chunk.model_dump()) + "\n"
 
     async def load_inputs(self, chat_dto: ChatDTO) -> dict:

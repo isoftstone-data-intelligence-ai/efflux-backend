@@ -24,7 +24,6 @@ class LLMChat(ABC):
 
         创建一个新实例时会调用此构造函数来初始化语言模型。
         """
-        self.llm_model = self.get_llm_model()
 
     @abstractmethod
     def is_enable(self) -> bool:
@@ -58,7 +57,9 @@ class LLMChat(ABC):
             Optional[LanguageModelLike]: 语言模型实例或None如果未指定。
         """
 
-    async def stream_chat(self, inputs: Union[dict[str, Any], Any], tools: List[BaseTool], callback=None) -> \
+    async def stream_chat(self, inputs: Union[dict[str, Any], Any], tools: List[BaseTool],
+                          api_key: str, base_url: str, model: str,
+                          callback=None) -> \
             AsyncGenerator[LLMMessage, None]:
         """
         异步流式处理用户输入并与语言模型交互。
@@ -78,7 +79,9 @@ class LLMChat(ABC):
             "tool_errors": []  # 存储工具调用错误
         }
 
-        graph = create_react_agent(model=self.llm_model, tools=tools)
+        llm_model = self.get_llm_model(api_key,base_url,model)
+
+        graph = create_react_agent(model=llm_model, tools=tools)
 
         async for chunk in graph.astream(inputs, stream_mode=["messages", "values"]):
             # chat消息获取
