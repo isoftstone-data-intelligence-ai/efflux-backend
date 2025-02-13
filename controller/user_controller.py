@@ -43,9 +43,9 @@ async def create_user(user: UserInit, user_service: UserService = Depends(get_us
     return result_utils.build_response(rs)
 
 @router.get("/tokeninfo", summary="用户token信息", response_model=UserResult)
-async def read_user_token_info():
+async def read_user_token_info() -> GlobalResponse:
     """
     获取当前线程/协程内的token信息
     """
     user_info = request_token_context.get()
-    return user_info
+    return result_utils.build_response(user_info)
