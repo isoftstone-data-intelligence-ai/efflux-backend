@@ -34,21 +34,23 @@ class LlmConfigDAO:
     async def create_config(self,
                           user_id: int,
                           template_id: int,
-                          provider: str,
+                          provider: Optional[str],
                           api_key: str,
                           base_url: str,
                           model: str,
+                          model_nickname: str,
                           extra_config: Optional[Dict[str, Any]] = None) -> LlmConfig:
         """创建新的 LLM 配置
         
         Args:
             user_id: 用户ID
             template_id: 模板ID
-            provider: 模型提供商名称
+            provider: 模型提供商名称，可选
             api_key: API密钥
             base_url: API基础URL
             model: 模型名称
-            extra_config: 额外配置参数
+            model_nickname: 展示给用户的模型名称
+            extra_config: 额外配置参数，可选
         """
         async with self._session_factory() as session:
             new_config = LlmConfig(
@@ -58,6 +60,7 @@ class LlmConfigDAO:
                 api_key=api_key,
                 base_url=base_url,
                 model=model,
+                model_nickname=model_nickname,
                 extra_config=extra_config,
                 created_at=datetime.now(),
                 updated_at=datetime.now()
@@ -73,6 +76,7 @@ class LlmConfigDAO:
                           api_key: Optional[str] = None,
                           base_url: Optional[str] = None,
                           model: Optional[str] = None,
+                          model_nickname: Optional[str] = None,
                           extra_config: Optional[Dict[str, Any]] = None) -> Optional[LlmConfig]:
         """更新 LLM 配置信息"""
         async with self._session_factory() as session:
@@ -87,6 +91,8 @@ class LlmConfigDAO:
                 update_data['base_url'] = base_url
             if model is not None:
                 update_data['model'] = model
+            if model_nickname is not None:
+                update_data['model_nickname'] = model_nickname
             if extra_config is not None:
                 update_data['extra_config'] = extra_config
             
