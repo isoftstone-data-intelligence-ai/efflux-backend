@@ -1,4 +1,4 @@
-from core.llm.llm_manager import LLMChat
+from core.llm.llm_manager import LLMChat, LLMManager
 from typing import AsyncGenerator, List, Optional
 from core.mcp.convert_mcp_tools import convert_mcp_to_langchain_tools
 from dao.chat_window_dao import ChatWindowDAO
@@ -89,10 +89,12 @@ class ChatService:
 
         # 构造模型的输入内容
         inputs = await self.load_inputs(chat_dto)
-        user_llm_config_id = 1
-        user_llm_config: LlmConfig = self.llm_config_dao.get_config_by_id(user_llm_config_id)
-        get_llm
 
+        user_llm_config_id = 1
+        user_llm_config: LlmConfig = await self.llm_config_dao.get_config_by_id(user_llm_config_id)
+        llm_nick_name = user_llm_config.nick_name
+        llm_original = LLMManager.get_llm(name=llm_nick_name)
+        llm = llm_original.get_llm_model(user_llm_config.api_key,user_llm_config.base_url,user_llm_config.model)
 
 
         # 调用语言模型的流式接口，生成响应
