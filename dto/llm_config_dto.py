@@ -16,7 +16,7 @@ class LLMConfigDTO(BaseModel):
 
 class CreateLLMConfigDTO(BaseModel):
     """仅用于创建操作的 DTO"""
-    user_id: int
+    user_id: Optional[int] = None
     template_id: int
     provider: str
     api_key: str

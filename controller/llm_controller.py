@@ -29,7 +29,7 @@ async def get_configs(
     llm_service: LLMService = Depends(get_llm_service)
 ) -> GlobalResponse:
     """获取当前用户的所有 LLM 配置"""
-    user_id = request_token_context.get().get("user_id")
+    user_id = request_token_context.get().get("id")
     configs = await llm_service.get_user_configs(user_id)
     return result_utils.build_response(configs)
 
@@ -50,7 +50,7 @@ async def add_config(
     llm_service: LLMService = Depends(get_llm_service)
 ) -> GlobalResponse:
     """添加新的 LLM 配置"""
-    user_id = request_token_context.get().get("user_id")
+    user_id = request_token_context.get().get("id")
     config.user_id = user_id
     new_config = await llm_service.add_config(config)
     return result_utils.build_response(new_config)
@@ -62,7 +62,7 @@ async def update_config(
     llm_service: LLMService = Depends(get_llm_service)
 ) -> GlobalResponse:
     """更新 LLM 配置"""
-    user_id = request_token_context.get().get("user_id")
+    user_id = request_token_context.get().get("id")
     config.user_id = user_id
     updated_config = await llm_service.update_config(config)
     return result_utils.build_response(updated_config)
