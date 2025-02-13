@@ -2,9 +2,11 @@ from core.llm.llm_manager import LLMChat
 from typing import AsyncGenerator, List, Optional
 from core.mcp.convert_mcp_tools import convert_mcp_to_langchain_tools
 from dao.chat_window_dao import ChatWindowDAO
+from dao.llm_config_dao import LlmConfigDAO
 from dto.chat_dto import ChatDTO
 from dto.chat_window_dto import ContentDTO, ChatMessageDTO
 from model.chat_window import ChatWindow
+from model.llm_config import LlmConfig
 from service.mcp_config_service import MCPConfigService
 import json
 
@@ -17,7 +19,8 @@ class ChatService:
     同时维护用户的历史会话记录，以实现更自然的上下文会话效果。
     """
 
-    def __init__(self, llm: LLMChat, mcp_config_service: MCPConfigService, chat_window_dao: ChatWindowDAO):
+    def __init__(self, mcp_config_service: MCPConfigService, chat_window_dao: ChatWindowDAO,
+                 llm_config_dao: LlmConfigDAO):
         """
         初始化 ChatService
 
@@ -26,8 +29,9 @@ class ChatService:
             mcp_config_service (MCPConfigService): MCP 配置服务，用于获取 MCP-Server 的相关配置。
             chat_window_dao: 会话记录DAO，用于持久化会话及对话历史
         """
-        self.llm = llm
+        # self.llm = llm
         self.chat_window_dao = chat_window_dao
+        self.llm_config_dao = llm_config_dao
         self.mcp_config_service = mcp_config_service
         self.user_history_dict = {}  # 用于存储每个用户的历史会话记录
 
@@ -85,9 +89,14 @@ class ChatService:
 
         # 构造模型的输入内容
         inputs = await self.load_inputs(chat_dto)
+        user_llm_config_id = 1
+        user_llm_config: LlmConfig = self.llm_config_dao.get_config_by_id(user_llm_config_id)
+        get_llm
+
+
 
         # 调用语言模型的流式接口，生成响应
-        async for chunk in self.llm.stream_chat(inputs=inputs, tools=tools, callback=data_callback):
+        async for chunk in llm.stream_chat(inputs=inputs, tools=tools, callback=data_callback):
             yield json.dumps(chunk.model_dump()) + "\n"
 
     async def load_inputs(self, chat_dto: ChatDTO) -> dict:
