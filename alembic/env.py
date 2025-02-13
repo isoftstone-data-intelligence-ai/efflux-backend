@@ -32,7 +32,8 @@ from extensions.ext_database import Base, engine
 from model.user import User
 from model.mcp_server import McpServer
 from model.chat_window import ChatWindow
-
+from model.llm_config import LlmConfig
+from model.llm_template import LlmTemplate
 
 target_metadata = Base.metadata
 
