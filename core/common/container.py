@@ -59,7 +59,13 @@ class Container(containers.DeclarativeContainer):
         azure.name(): azure,
         claude.name(): claude,
         ollama.name(): ollama,
-        open_ai.name(): open_ai,
+        "deepseek-r1": open_ai,
+        "qwen-max": open_ai,
+        "gpt-4o": azure,
+        "claude-3.5-sonnet": claude,
+        "doubao-pro": open_ai,
+        "moonshot-v1": open_ai,
+        "deepseek-r1:8b": ollama
     }
     # 注册LLM Manager
     llm_manager = providers.Singleton(LLMManager, llm_map)
@@ -68,7 +74,7 @@ class Container(containers.DeclarativeContainer):
     chat_service = providers.Singleton(ChatService,
                                        mcp_config_service=mcp_config_service,
                                        chat_window_dao=chat_window_dao,
-                                       llm_config_dao=LlmConfigDAO,
+                                       llm_config_dao=llm_config_dao,
                                        llm_manager=llm_manager)
 
 

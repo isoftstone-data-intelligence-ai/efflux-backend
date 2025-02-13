@@ -15,11 +15,11 @@ class LlmConfigDAO:
             result = await session.execute(select(LlmConfig))
             return result.scalars().all()
 
-    async def get_config_by_id(self, id: int) -> Optional[LlmConfig]:
+    async def get_config_by_id(self, llm_config_id: int) -> Optional[LlmConfig]:
         """根据配置ID获取 LLM 配置"""
         async with self._session_factory() as session:
             result = await session.execute(
-                select(LlmConfig).where(LlmConfig.id == id)
+                select(LlmConfig).where(LlmConfig.id == llm_config_id)
             )
             return result.scalar_one_or_none()
 

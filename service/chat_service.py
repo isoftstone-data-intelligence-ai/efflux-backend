@@ -92,13 +92,16 @@ class ChatService:
 
         # 模型选择
         user_llm_config_id = chat_dto.llm_config_id
-        user_llm_config: LlmConfig = await self.llm_config_dao.get_config_by_id(user_llm_config_id)
+        user_llm_config: LlmConfig = await self.llm_config_dao.get_config_by_id(llm_config_id=user_llm_config_id)
         llm_nick_name = user_llm_config.model_nickname
         llm_chat = self.llm_manager.get_llm(llm_nick_name)
 
 
         # 调用语言模型的流式接口，生成响应
-        async for chunk in llm_chat.stream_chat(inputs=inputs, tools=tools, callback=data_callback):
+        async for chunk in llm_chat.stream_chat(inputs=inputs, tools=tools, callback=data_callback,
+                                                api_key=user_llm_config.api_key,
+                                                base_url=user_llm_config.base_url,
+                                                model=user_llm_config.model):
             yield json.dumps(chunk.model_dump()) + "\n"
 
     async def load_inputs(self, chat_dto: ChatDTO) -> dict:
