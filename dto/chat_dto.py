@@ -13,4 +13,4 @@ class ChatDTO(BaseModel):
     query: str
     # 对话历史记录
     history: Optional[dict] = None
-    user_id: int
+    user_id: int = None
