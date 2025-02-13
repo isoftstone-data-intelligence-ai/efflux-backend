@@ -12,10 +12,11 @@ class ExceptionType(Enum):
     DUPLICATE_SERVER_NAME = (9, "服务器名称已存在")
     DUPLICATE_USER_NAME = (10, "用户名已存在")
     DUPLICATE_EMAIL = (11, "邮箱已存在")
-    # 追加自定义异常
-
-
-
+    
+    # LLM 配置相关异常
+    CONFIG_UPDATE_FAILED = (12, "LLM配置更新失败")
+    CONFIG_DELETE_FAILED = (13, "LLM配置删除失败")
+    TEMPLATE_NOT_FOUND = (14, "LLM模板未找到")
 
     def __new__(cls, code, message):
         value = len(cls.__members__) + 1

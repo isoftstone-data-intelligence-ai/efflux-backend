@@ -15,6 +15,7 @@ from core.llm.azure_open_ai import AzureLlm
 # from core.llm.moonshot_open_ai import MoonshotLlm
 # from core.llm.doubao_open_ai import DoubaoLlm
 # from core.llm.ollama_llm import OllamaLlm
+from service.llm_service import LLMService
 
 class Container(containers.DeclarativeContainer):
     # 注册数据库会话提供器
@@ -39,9 +40,12 @@ class Container(containers.DeclarativeContainer):
     llm_config_dao = providers.Singleton(LlmConfigDAO, session_factory=database_provider.provided.session_factory)
     # 注册llm_template DAO
     llm_template_dao = providers.Singleton(LlmTemplateDAO, session_factory=database_provider.provided.session_factory)
+    # 注册 LLM Service
+    llm_service = providers.Singleton(LLMService,
+                                      llm_config_dao=llm_config_dao,
+                                      llm_template_dao=llm_template_dao)
 
     # 注册LLM Manager
-    llm_manager = providers.Singleton(LLMManager, )
 
 
     # 注册模型
