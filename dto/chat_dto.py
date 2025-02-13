@@ -19,4 +19,5 @@ class ChatDTO(BaseModel):
     query: str
     # 对话历史记录
     history: Optional[dict] = None
-    user_id: int
+    # 用户llm config id
+    llm_config_id: int
