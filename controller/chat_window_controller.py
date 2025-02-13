@@ -15,6 +15,6 @@ def get_chat_window_service():
 @router.get("/chat_window_list", summary="用户会话列表")
 async def get_chat_window_list(chat_window_service: ChatWindowService = Depends(get_chat_window_service)) \
         -> GlobalResponse:
-    user_id = request_token_context.get().get("user_id")
+    user_id = request_token_context.get().get("id")
     result = await chat_window_service.get_user_chat_windows(user_id)
     return result_utils.build_response(result)
