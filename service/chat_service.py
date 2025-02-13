@@ -92,7 +92,7 @@ class ChatService:
         inputs = await self.load_inputs(chat_dto)
 
         # 模型选择
-        user_llm_config_id = 1
+        user_llm_config_id = chat_dto.llm_config_dto
         user_llm_config: LlmConfig = await self.llm_config_dao.get_config_by_id(user_llm_config_id)
         llm_nick_name = user_llm_config.model_nickname
         llm_chat = self.llm_manager.get_llm(llm_nick_name)

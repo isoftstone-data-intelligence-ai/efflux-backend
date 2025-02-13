@@ -20,6 +20,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if any(request.url.path.startswith(path) for path in self.exclude_paths):
             return await call_next(request)
 
+        # 检查请求方法是否是 OPTIONS
+        if request.method == "OPTIONS":
+            return await call_next(request)
         token = request.headers.get("Authorization")
 
         if token:
