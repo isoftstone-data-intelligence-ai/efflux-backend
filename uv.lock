@@ -97,6 +97,24 @@ wheels = [
 ]
 
 [[package]]
+name = "anthropic"
+version = "0.45.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "distro" },
+    { name = "httpx" },
+    { name = "jiter" },
+    { name = "pydantic" },
+    { name = "sniffio" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/15/74/2b2485fc120da834c0c5be07462541ec082e9fa8851d845f2587e480535a/anthropic-0.45.2.tar.gz", hash = "sha256:32a18b9ecd12c91b2be4cae6ca2ab46a06937b5aa01b21308d97a6d29794fb5e", size = 200901 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/74/86/e81814e542d1eaeec84d2312bec93a99b9ef1d78d9bfae1fc5dd74abdf15/anthropic-0.45.2-py3-none-any.whl", hash = "sha256:ecd746f7274451dfcb7e1180571ead624c7e1195d1d46cb7c70143d2aedb4d35", size = 222797 },
+]
+
+[[package]]
 name = "anyio"
 version = "4.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -259,7 +277,7 @@ name = "click"
 version = "8.1.7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32'" },
+    { name = "colorama", marker = "platform_system == 'Windows'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/96/d3/f04c7bfcf5c1862a2a5b845c6b2b360488cf47af55dfa79c98f6a6bf98b5/click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de", size = 336121 }
 wheels = [
@@ -382,12 +400,14 @@ dependencies = [
     { name = "greenlet" },
     { name = "jsonschema-pydantic" },
     { name = "langchain" },
+    { name = "langchain-anthropic" },
     { name = "langchain-ollama" },
     { name = "langchain-openai" },
     { name = "langgraph" },
     { name = "mcp" },
     { name = "openai" },
     { name = "passlib" },
+    { name = "pydantic" },
     { name = "pyjwt" },
     { name = "python-dotenv" },
     { name = "python-jose", extra = ["cryptography"] },
@@ -406,12 +426,14 @@ requires-dist = [
     { name = "greenlet", specifier = ">=3.1.1" },
     { name = "jsonschema-pydantic", specifier = ">=0.6" },
     { name = "langchain", specifier = ">=0.3.11" },
+    { name = "langchain-anthropic", specifier = ">=0.3.7" },
     { name = "langchain-ollama", specifier = ">=0.2.3" },
-    { name = "langchain-openai", specifier = ">=0.2.12" },
+    { name = "langchain-openai", specifier = ">=0.3.3" },
     { name = "langgraph", specifier = ">=0.2.59" },
     { name = "mcp", specifier = ">=1.1.1" },
     { name = "openai", specifier = ">=1.57.2" },
     { name = "passlib", specifier = ">=1.7.4" },
+    { name = "pydantic", specifier = ">=2.0.0" },
     { name = "pyjwt", specifier = ">=2.10.1" },
     { name = "python-dotenv", specifier = ">=1.0.1" },
     { name = "python-jose", extras = ["cryptography"], specifier = ">=3.3.0" },
@@ -650,6 +672,20 @@ wheels = [
 ]
 
 [[package]]
+name = "langchain-anthropic"
+version = "0.3.7"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anthropic" },
+    { name = "langchain-core" },
+    { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/70/b0/84cfe0b4b829bcdc99fbb1a06973a6f3109b4e326292cdf5fa46f88dbf2f/langchain_anthropic-0.3.7.tar.gz", hash = "sha256:534cd1867bc41711cd8c3d0a0bc055e6c5a4215953c87260209a90dc5816f30d", size = 39838 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f3/b3/111e1f41b0044687ec0c34c921ad52d33d2802282b1bc45343d5dd923fb6/langchain_anthropic-0.3.7-py3-none-any.whl", hash = "sha256:adec0a1daabd3c25249753c6cd625654917fb9e3feee68e72c7dc3f4449c0f3c", size = 22998 },
+]
+
+[[package]]
 name = "langchain-core"
 version = "0.3.34"
 source = { registry = "https://pypi.org/simple" }
@@ -682,16 +718,16 @@ wheels = [
 
 [[package]]
 name = "langchain-openai"
-version = "0.2.12"
+version = "0.3.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "langchain-core" },
     { name = "openai" },
     { name = "tiktoken" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/07/3d/23166abcdc544161d283c78b18c49c50091640a71af3b70c325e3304a6c1/langchain_openai-0.2.12.tar.gz", hash = "sha256:8b92096623065a2820e89aa5fb0a262fb109d56c346e3b09ba319af424c45cd1", size = 43442 }
+sdist = { url = "https://files.pythonhosted.org/packages/fe/18/c7829a2ce2977d22db582d19b311d7dc3d100a51c32f5766517ee3474c26/langchain_openai-0.3.5.tar.gz", hash = "sha256:40cd5649b93b1af20a20e1cbee5a47628a77e15114a11f9b3f2ab08c7d1302bf", size = 255643 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/cd/01/7a0259929474c47cadecaef64fd9361a95c8091d5f88d53c54d251abf05f/langchain_openai-0.2.12-py3-none-any.whl", hash = "sha256:916965c45584d9ea565825ad3bb7629b1ff57f12f36d4b937e5b7d65903839d6", size = 50664 },
+    { url = "https://files.pythonhosted.org/packages/9a/4a/18e98bb61e00f0553383fd14997a8d778999f5cf80109a74eb746a1f5919/langchain_openai-0.3.5-py3-none-any.whl", hash = "sha256:137a7514f11afeab26e5fc1eda3c2b96fbbb18a96d963ba256faecceb189ea71", size = 54982 },
 ]
 
 [[package]]
@@ -951,7 +987,7 @@ wheels = [
 
 [[package]]
 name = "openai"
-version = "1.57.2"
+version = "1.62.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -963,9 +999,9 @@ dependencies = [
     { name = "tqdm" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a9/b6/9a404e1d1043cabbffb020f9d850a44a31f30f284444a528d9a1f0eec9df/openai-1.57.2.tar.gz", hash = "sha256:5f49fd0f38e9f2131cda7deb45dafdd1aee4f52a637e190ce0ecf40147ce8cee", size = 315752 }
+sdist = { url = "https://files.pythonhosted.org/packages/57/82/163797f1ebfc7effd23e942fd4e52e023e8f9e0d6895e838c62c7737311d/openai-1.62.0.tar.gz", hash = "sha256:ef3f6864ae2f75fa6296bc9811acf684b95557fcb611fe95734215a8b9150b43", size = 352798 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/37/e7/95437fb676381e927d4cb3f9f8dd90ed24cfd264f572db4d395037428594/openai-1.57.2-py3-none-any.whl", hash = "sha256:f7326283c156fdee875746e7e54d36959fb198eadc683952ee05e3302fbd638d", size = 389873 },
+    { url = "https://files.pythonhosted.org/packages/30/0f/c8f8d3b0c313d9ee0539941eb38fd549ba3b776f0daf19a3fb6e4aeac247/openai-1.62.0-py3-none-any.whl", hash = "sha256:dcb7f9fb4fbc3f27e3ffd2d7bf045be9211510d7fafefcef7ad2302cb27484e0", size = 464814 },
 ]
 
 [[package]]
@@ -1388,7 +1424,7 @@ name = "tqdm"
 version = "4.67.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32'" },
+    { name = "colorama", marker = "platform_system == 'Windows'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/a8/4b/29b4ef32e036bb34e4ab51796dd745cdba7ed47ad142a9f4a1eb8e0c744d/tqdm-4.67.1.tar.gz", hash = "sha256:f8aef9c52c08c13a65f30ea34f4e5aac3fd1a34959879d7e59e63027286627f2", size = 169737 }
 wheels = [
