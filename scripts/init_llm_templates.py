@@ -1,21 +1,28 @@
 import os
-from sqlalchemy import create_engine, select
+import sys
+import asyncio
+
+# 将项目根目录添加到 Python 路径
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy import select
 from dotenv import load_dotenv
 from model.llm_template import LlmTemplate
 
 # 加载环境变量
 load_dotenv()
 
-# 构建数据库连接 URL
+# 构建数据库连接 URL（使用 asyncpg）
 DATABASE_URL = (
-    f"postgresql://{os.environ['DATABASE_USERNAME']}:{os.environ['DATABASE_PASSWORD']}"
+    f"postgresql+asyncpg://{os.environ['DATABASE_USERNAME']}:{os.environ['DATABASE_PASSWORD']}"
     f"@{os.environ['DATABASE_HOST']}:{os.environ['DATABASE_PORT']}/{os.environ['DATABASE_NAME']}"
 )
 
-# 创建引擎和会话
-engine = create_engine(DATABASE_URL)
-Session = sessionmaker(bind=engine)
+# 创建异步引擎和会话
+engine = create_async_engine(DATABASE_URL)
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 # 定义模板数据
 TEMPLATES = [
@@ -77,28 +84,33 @@ TEMPLATES = [
     },
 ]
 
-def init_templates():
+async def init_templates():
     """初始化 LLM 模板数据"""
-    session = Session()
-    try:
-        # 检查是否已存在数据
-        if session.query(LlmTemplate).first():
-            print("模板数据已存在，跳过初始化...")
-            return
+    async with AsyncSessionLocal() as session:
+        try:
+            # 检查是否已存在数据
+            result = await session.execute(select(LlmTemplate))
+            if result.scalar_one_or_none():
+                print("模板数据已存在，跳过初始化...")
+                return
 
-        # 插入模板数据
-        for template_data in TEMPLATES:
-            template = LlmTemplate(**template_data)
-            session.add(template)
-        
-        session.commit()
-        print("成功初始化 LLM 模板数据！")
-    except Exception as e:
-        session.rollback()
-        print(f"初始化模板时出错: {e}")
-        raise
+            # 插入模板数据
+            for template_data in TEMPLATES:
+                template = LlmTemplate(**template_data)
+                session.add(template)
+            
+            await session.commit()
+            print("成功初始化 LLM 模板数据！")
+        except Exception as e:
+            await session.rollback()
+            print(f"初始化模板时出错: {e}")
+            raise
+
+async def main():
+    try:
+        await init_templates()
     finally:
-        session.close()
+        await engine.dispose()
 
 if __name__ == "__main__":
-    init_templates() 
+    asyncio.run(main()) 
