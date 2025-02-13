@@ -1,12 +1,7 @@
-import os
 from langchain_core.language_models import LanguageModelLike
 from core.llm.llm_chat import LLMChat
 from langchain_openai import AzureChatOpenAI
-from typing import Union
-from dotenv import load_dotenv
-
-# 加载环境变量
-load_dotenv()
+from typing import Optional
 
 
 class AzureLlm(LLMChat):
@@ -25,31 +20,40 @@ class AzureLlm(LLMChat):
         Returns:
             bool: 返回 True 表示模型启用
         """
-        return True
+        return self.ENABLED
 
-    def name(self) -> Union[str, None]:
+    def name(self) -> Optional[str]:
         """
         获取模型的名称
 
         Returns:
-            Union[str, None]: 模型名称，返回 "AzureLlm" 表示当前模型。
+            Optional[str]: 模型名称
         """
         return "AzureLlm"
 
-    def get_llm_model(self) -> Union[LanguageModelLike, None]:
+    def get_llm_model(self, api_key: str, base_url: str, model: str) -> Optional[LanguageModelLike]:
         """
         获取 Azure OpenAI 服务的语言模型实例
 
-        通过环境变量加载 Azure OpenAI 服务的配置，创建一个 AzureChatOpenAI 实例。
+        Args:
+            api_key (str): API 密钥
+            base_url (str): API Base URL
+            model (str): 使用的模型名称
 
         Returns:
-            Union[LanguageModelLike, None]: 返回一个 AzureChatOpenAI 实例，用于流式生成响应。
+            Optional[LanguageModelLike]: 返回一个 AzureChatOpenAI 实例，用于流式生成响应。
+            如果创建实例失败，返回 None。
+
+        Raises:
+            Exception: 当创建 AzureChatOpenAI 实例时发生错误
         """
-        return AzureChatOpenAI(
-            # deployment_name=os.environ['DEPLOYMENT_NAME'],  # Azure 部署名称
-            openai_api_key=os.environ['AZURE_API_KEY'],      # Azure OpenAI API 密钥
-            azure_endpoint=os.environ['AZURE_ENDPOINT'],     # Azure 服务端点
-            openai_api_version=os.environ['AZURE_API_VERSION'],  # Azure OpenAI API 版本
-            temperature=0.7,  # 模型生成文本的随机性参数
-            streaming=True,   # 启用流式响应
-        )
+        try:
+            return AzureChatOpenAI(
+                openai_api_key=api_key,     # Azure OpenAI API 密钥
+                azure_endpoint=base_url,    # Azure 服务端点
+                openai_api_version=model,   # Azure OpenAI API 版本
+                streaming=True,             # 启用流式响应
+            )
+        except Exception as e:
+            # 这里可以添加日志记录
+            raise Exception(f"Failed to create AzureChatOpenAI instance: {str(e)}")
