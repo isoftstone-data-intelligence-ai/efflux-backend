@@ -37,8 +37,9 @@ async def stream_response(chat_dto: ChatDTO, chat_service: ChatService = Depends
     """
     # token中获取user_id
     user_id = request_token_context.get().get("id")
+    chat_dto.user_id = user_id
     return StreamingResponse(
-        chat_service.agent_stream(chat_dto, user_id),
+        chat_service.agent_stream(chat_dto),
         media_type="text/event-stream"
     )
 
