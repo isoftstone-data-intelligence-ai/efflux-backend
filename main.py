@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from exception.exception import global_exception_handlers
-from controller import chat_controller, user_controller, login_controller, mcp_controller, chat_window_controller
+from controller import chat_controller, user_controller, login_controller, mcp_controller, chat_window_controller, llm_controller
 import configparser
 from core.security.middleware import AuthMiddleware
 
@@ -42,6 +42,7 @@ app.include_router(user_controller.router)
 app.include_router(login_controller.router)
 app.include_router(mcp_controller.router)
 app.include_router(chat_window_controller.router)
+app.include_router(llm_controller.router)
 
 # 在应用程序启动时初始化资源
 # container = Container()
