@@ -36,7 +36,7 @@ class ChatService:
         self.llm_manager = llm_manager
         self.user_history_dict = {}  # 用于存储每个用户的历史会话记录
 
-    async def agent_stream(self, chat_dto: ChatDTO, user_id: int) -> AsyncGenerator[str, None]:
+    async def agent_stream(self, chat_dto: ChatDTO) -> AsyncGenerator[str, None]:
         """
         langchain 流式代理方法
 
@@ -44,13 +44,12 @@ class ChatService:
 
         Args:
             chat_dto (ChatDTO): 会话请求数据传输对象，包含用户 ID、问题、提示词等。
-            user_id : 用户id，从token中获取
         Yields:
             str: 模型返回的流式会话响应，每次生成一个 JSON 格式的消息块。
         """
         # 判断是否需要创建会话
         if not chat_dto.chat_id:
-            new_chat_window_id = await self.create_chat(user_id, chat_dto.query)
+            new_chat_window_id = await self.create_chat(chat_dto.user_id, chat_dto.query)
         # 初始化 langchain agent 工具列表
         tools = []
         if chat_dto.server_id:
@@ -71,14 +70,14 @@ class ChatService:
                 assistant_reply = ''.join(collected_data["messages"])
 
                 # 初始化或更新用户的历史记录
-                if user_id not in self.user_history_dict:
-                    self.user_history_dict[user_id] = []
-                self.user_history_dict[user_id].append({
+                if chat_dto.user_id not in self.user_history_dict:
+                    self.user_history_dict[chat_dto.user_id] = []
+                self.user_history_dict[chat_dto.user_id].append({
                     "user": chat_dto.query,
                     "assistant": assistant_reply
                 })
                 # 保留最近 3 条历史记录
-                self.user_history_dict[user_id] = self.user_history_dict[user_id][-3:]
+                self.user_history_dict[chat_dto.user_id] = self.user_history_dict[chat_dto.user_id][-3:]
                 # 更新会话历史记录
                 if chat_dto.chat_id is None:
                     chat_window_id = new_chat_window_id

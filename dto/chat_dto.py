@@ -21,3 +21,5 @@ class ChatDTO(BaseModel):
     history: Optional[dict] = None
     # 用户llm config id
     llm_config_id: int
+    # 用户id
+    user_id : Optional[int] = None
