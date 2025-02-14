@@ -29,7 +29,7 @@ class AzureLlm(LLMChat):
         Returns:
             Optional[str]: 模型名称
         """
-        return "AzureLlm"
+        return "Azure"
 
     def get_llm_model(self, api_key: str, base_url: str, model: str) -> Optional[LanguageModelLike]:
         """

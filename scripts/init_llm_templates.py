@@ -27,11 +27,11 @@ AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=F
 # 定义模板数据
 TEMPLATES = [
     {
-        "provider": "Deepseek",
-        "model_display_name": "deepseek-r1",
+        "provider": "Azure",
+        "model_display_name": "gpt-4o",
         "api_key_variable": "API Key",
-        "base_url_variable": "Base URL",
-        "model_variable": "Model",
+        "base_url_variable": "Endpoint",
+        "model_variable": "API Version",
     },
     {
         "provider": "Open AI",
@@ -41,22 +41,8 @@ TEMPLATES = [
         "model_variable": "Model",
     },
     {
-        "provider": "Claude",
+        "provider": "Anthropic",
         "model_display_name": "claude-3.5-sonnet",
-        "api_key_variable": "API Key",
-        "base_url_variable": "Base URL",
-        "model_variable": "Model",
-    },
-    {
-        "provider": "Azure",
-        "model_display_name": "gpt-4o",
-        "api_key_variable": "API Key",
-        "base_url_variable": "Endpoint",
-        "model_variable": "API Version",
-    },
-    {
-        "provider": "Ollama",
-        "model_display_name": "deepseek-r1:8b",
         "api_key_variable": "API Key",
         "base_url_variable": "Base URL",
         "model_variable": "Model",
@@ -64,6 +50,20 @@ TEMPLATES = [
     {
         "provider": "阿里",
         "model_display_name": "qwen-max",
+        "api_key_variable": "API Key",
+        "base_url_variable": "Base URL",
+        "model_variable": "Model",
+    },
+    {
+        "provider": "Deepseek",
+        "model_display_name": "deepseek-r1",
+        "api_key_variable": "API Key",
+        "base_url_variable": "Base URL",
+        "model_variable": "Model",
+    },
+    {
+        "provider": "Ollama",
+        "model_display_name": "deepseek-r1:8b",
         "api_key_variable": "API Key",
         "base_url_variable": "Base URL",
         "model_variable": "Model",

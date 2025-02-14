@@ -24,7 +24,7 @@ class ClaudeLlm(LLMChat):
         Returns:
             Optional[str]: 模型名称
         """
-        return "ClaudeLlm"
+        return "Anthropic"
 
     def get_llm_model(self, api_key: str, base_url: str, model: str) -> Optional[LanguageModelLike]:
         """
