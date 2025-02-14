@@ -1,5 +1,4 @@
 from dependency_injector import containers, providers
-
 from core.llm.claude import ClaudeLlm
 from core.llm.llm_manager import LLMManager
 from core.llm.ollama import OllamaLlm
@@ -15,10 +14,6 @@ from service.chat_window_service import ChatWindowService
 from service.mcp_config_service import MCPConfigService
 from service.user_service import UserService
 from core.llm.azure_open_ai import AzureLlm
-# from core.llm.qwen_open_ai import QwenLlm
-# from core.llm.moonshot_open_ai import MoonshotLlm
-# from core.llm.doubao_open_ai import DoubaoLlm
-# from core.llm.ollama_llm import OllamaLlm
 from service.llm_service import LLMService
 
 
@@ -49,17 +44,17 @@ class Container(containers.DeclarativeContainer):
     llm_service = providers.Singleton(LLMService,
                                       llm_config_dao=llm_config_dao,
                                       llm_template_dao=llm_template_dao)
-
+    # 注入支持的LLMChat，根据提供商和风格分类
     azure = AzureLlm()
     claude = ClaudeLlm()
     ollama = OllamaLlm()
     open_ai = OpenAILlm()
-
+    # llm chat集合
     llm_map = {
         azure.name(): azure,
         claude.name(): claude,
         ollama.name(): ollama,
-        "default": open_ai
+        "default": open_ai # 默认使用open ai风格的LLMChat
     }
     # 注册LLM Manager
     llm_manager = providers.Singleton(LLMManager, llm_map)
