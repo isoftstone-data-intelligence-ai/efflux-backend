@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 # 对话信息内容
 class ContentDTO(BaseModel):
-    type: str  # text | image
+    type: str  # text | image | code | file
     text: Optional[str] = None
     image: Optional[str] = None
     
