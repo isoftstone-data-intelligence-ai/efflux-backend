@@ -30,6 +30,10 @@ Efflux is an LLM-based Agent chat client featuring streaming responses and chat 
 - Real-time streaming chat responses
 - Chat history management
 
+### Online Demo
+You can try out Efflux's features through our [online demo](http://47.236.204.213:3000/login).
+
+
 ### Requirements
 - Python 3.12+
 - PostgreSQL
@@ -115,7 +119,13 @@ alembic upgrade head --sql
 alembic upgrade head
 ```
 
-9. Start the service
+9. Initialize LLM template data
+```bash
+# Run initialization script
+python scripts/init_llm_templates.py
+```
+
+10. Start the service
 ```bash
 python -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
