@@ -9,6 +9,14 @@ class ChatWindowService:
         self.chat_window_dao = chat_window_dao
 
 
+    async def add_code_history(self, chat_window: ChatWindow) -> bool:
+        """
+        新增代码模式历史记录
+        :param chat_window:
+        :return: bool
+        """
+
+
     async def get_user_chat_windows(self, user_id: int) -> List[ChatWindowDTO]:
         result = await self.chat_window_dao.get_user_chat_windows(user_id)
         return await self.convert_models_to_chat_windows(result)
