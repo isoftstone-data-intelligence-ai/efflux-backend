@@ -40,7 +40,8 @@ async def get_config(
     llm_service: LLMService = Depends(get_llm_service)
 ) -> GlobalResponse:
     """获取指定的 LLM 配置"""
-    config = await llm_service.get_config(_id)
+    user_id = request_token_context.get().get("id")
+    config = await llm_service.get_config(_id, user_id)
     return result_utils.build_response(config)
 
 
@@ -74,7 +75,8 @@ async def update_config(
 #     llm_service: LLMService = Depends(get_llm_service)
 # ) -> GlobalResponse:
 #     """删除 LLM 配置"""
-#     await llm_service.delete_config(_id)
+#     user_id = request_token_context.get().get("id")
+#     await llm_service.delete_config(_id, user_id)
 #     return result_utils.build_response(None)
 
 

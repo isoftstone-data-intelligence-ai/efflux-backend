@@ -39,13 +39,19 @@ class LLMService:
         configs = await self.llm_config_dao.get_configs_by_user_id(user_id)
         return [self.to_config_dto(config) for config in configs]
 
-    async def get_config(self, config_id: int) -> Optional[LLMConfigDTO]:
-        """获取单个 LLM 配置"""
+    async def get_config(self, config_id: int, user_id: int) -> Optional[LLMConfigDTO]:
+        """获取单个 LLM 配置，并验证是否属于当前用户"""
         config = await self.llm_config_dao.get_config_by_id(config_id)
         if config is None:
             raise BaseAPIException(
                 status_code=ExceptionType.RESOURCE_NOT_FOUND.code,
                 detail=ExceptionType.RESOURCE_NOT_FOUND.message
+            )
+        # 验证配置是否属于当前用户
+        if config.user_id != user_id:
+            raise BaseAPIException(
+                status_code=ExceptionType.PERMISSION_DENIED.code,
+                detail=ExceptionType.PERMISSION_DENIED.message
             )
         return self.to_config_dto(config)
 
@@ -99,12 +105,19 @@ class LLMService:
                 detail="Model 不能为空"
             )
 
-        # 获取当前配置信息
-        current_config = await self.get_config(llm_config.id)
+        # 获取当前配置信息并验证所有权
+        current_config = await self.llm_config_dao.get_config_by_id(llm_config.id)
         if not current_config:
             raise BaseAPIException(
                 status_code=ExceptionType.RESOURCE_NOT_FOUND.code,
                 detail=ExceptionType.RESOURCE_NOT_FOUND.message
+            )
+        
+        # 验证配置是否属于当前用户
+        if current_config.user_id != llm_config.user_id:
+            raise BaseAPIException(
+                status_code=ExceptionType.PERMISSION_DENIED.code,
+                detail=ExceptionType.PERMISSION_DENIED.message
             )
 
         updated_config = await self.llm_config_dao.update_config(
@@ -124,14 +137,21 @@ class LLMService:
             )
         return self.to_config_dto(updated_config)
 
-    async def delete_config(self, config_id: int) -> bool:
+    async def delete_config(self, config_id: int, user_id: int) -> bool:
         """删除 LLM 配置"""
-        # 确保配置存在
-        config = await self.get_config(config_id)
+        # 确保配置存在并验证所有权
+        config = await self.llm_config_dao.get_config_by_id(config_id)
         if not config:
             raise BaseAPIException(
                 status_code=ExceptionType.RESOURCE_NOT_FOUND.code,
                 detail=ExceptionType.RESOURCE_NOT_FOUND.message
+            )
+            
+        # 验证配置是否属于当前用户
+        if config.user_id != user_id:
+            raise BaseAPIException(
+                status_code=ExceptionType.PERMISSION_DENIED.code,
+                detail=ExceptionType.PERMISSION_DENIED.message
             )
 
         success = await self.llm_config_dao.delete_config(config_id)
