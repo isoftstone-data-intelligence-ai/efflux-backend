@@ -89,23 +89,23 @@ class ChatService:
             tools = await convert_mcp_to_langchain_tools([server_params])
 
         # 初始化code模式下系统提示词
-        if chat_dto.code:
-            chat_dto.prompt = """
-             就像网络接口的数据格式json字符串,去掉你的提示语，以及json数据结构外的内容 如下，代码部分放在code字段，其余字段看能否回填
-                {
-                  "commentary": "I will generate a simple 'Hello World' application using the Next.js template. 
-                  This will include a basic page that displays 'Hello World' when accessed.",
-                  "template": "nextjs-developer",
-                  "title": "Hello World",
-                  "description": "A simple Next.js app that displays 'Hello World'.",
-                  "additional_dependencies": [],
-                  "has_additional_dependencies": false,
-                  "install_dependencies_command": "",
-                  "port": 3000,
-                  "file_path": "pages/index.tsx",
-                  "code": ""
-                }
-            """
+        # if chat_dto.code:
+        #     chat_dto.prompt = """
+        #      就像网络接口的数据格式json字符串,去掉你的提示语，以及json数据结构外的内容 如下，代码部分放在code字段，其余字段看能否回填
+        #         {
+        #           "commentary": "I will generate a simple 'Hello World' application using the Next.js template.
+        #           This will include a basic page that displays 'Hello World' when accessed.",
+        #           "template": "nextjs-developer",
+        #           "title": "Hello World",
+        #           "description": "A simple Next.js app that displays 'Hello World'.",
+        #           "additional_dependencies": [],
+        #           "has_additional_dependencies": false,
+        #           "install_dependencies_command": "",
+        #           "port": 3000,
+        #           "file_path": "pages/index.tsx",
+        #           "code": ""
+        #         }
+        #     """
 
         # 定义回调方法，用于收集模型返回的数据
         async def data_callback(collected_data):
@@ -193,7 +193,7 @@ class ChatService:
         # summary_prompt = "根据会话记录总结出本次会话的概要"
         # summary_query = query + reply
         # summary = self.normal_chat(ChatDTO(prompt=summary_prompt, query=summary_query))
-        summary = query
+        summary = query[:10]
         # 创建新的会话
         new_chat_window = await self.chat_window_dao.create_chat_window(user_id=user_id, summary=summary)
         return new_chat_window.id
@@ -254,9 +254,9 @@ class ChatService:
             PermissionError: 当用户尝试访问不属于自己的 LLM 配置时抛出
         """
         # 获取用户的 LLM 配置
-        user_llm_config: LlmConfig = await self.llm_config_dao.get_config_by_id(llm_config_id=chat_dto.llm_config_id)
-        llm_nick_name = user_llm_config.model_nickname
-        llm_chat = self.llm_manager.get_llm(llm_nick_name)
+        user_llm_config = await self._validate_llm_config(chat_dto.user_id, chat_dto.llm_config_id)
+        llm_provider = user_llm_config.provider
+        llm_chat = self.llm_manager.get_llm(llm_provider)
         
         return await llm_chat.normal_chat(
             inputs=chat_dto.query,

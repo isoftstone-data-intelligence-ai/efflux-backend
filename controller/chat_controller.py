@@ -48,4 +48,5 @@ async def stream_response(chat_dto: ChatDTO, chat_service: ChatService = Depends
 async def normal_chat(chat_dto: ChatDTO, chat_service: ChatService = Depends(get_chat_service)):
     # token中获取user_id
     user_id = request_token_context.get().get("id")
+    chat_dto.user_id = user_id
     return await chat_service.normal_chat(chat_dto)
