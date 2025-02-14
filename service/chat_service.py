@@ -25,16 +25,42 @@ class ChatService:
         初始化 ChatService
 
         Args:
-            llm (LLMChat): 语言模型管理器，用于处理会话逻辑。
             mcp_config_service (MCPConfigService): MCP 配置服务，用于获取 MCP-Server 的相关配置。
-            chat_window_dao: 会话记录DAO，用于持久化会话及对话历史
+            chat_window_dao (ChatWindowDAO): 会话记录DAO，用于持久化会话及对话历史。
+            llm_config_dao (LlmConfigDAO): LLM配置DAO，用于管理和获取用户的LLM配置信息。
+            llm_manager (LLMManager): LLM管理器，用于管理不同的语言模型实例。
+
+        Attributes:
+            chat_window_dao: 会话窗口数据访问对象
+            llm_config_dao: LLM配置数据访问对象
+            mcp_config_service: MCP配置服务
+            llm_manager: LLM管理器
+            user_history_dict (dict): 用于存储每个用户的历史会话记录
         """
-        # self.llm = llm
         self.chat_window_dao = chat_window_dao
         self.llm_config_dao = llm_config_dao
         self.mcp_config_service = mcp_config_service
         self.llm_manager = llm_manager
         self.user_history_dict = {}  # 用于存储每个用户的历史会话记录
+
+    async def _validate_llm_config(self, user_id: int, llm_config_id: int) -> LlmConfig:
+        """
+        验证 LLM 配置是否属于指定用户。
+
+        Args:
+            user_id (int): 用户ID
+            llm_config_id (int): LLM配置ID
+
+        Returns:
+            LlmConfig: 验证通过的 LLM 配置
+
+        Raises:
+            PermissionError: 当用户尝试访问不属于自己的 LLM 配置时抛出
+        """
+        user_llm_config: LlmConfig = await self.llm_config_dao.get_config_by_id(llm_config_id=llm_config_id)
+        if user_llm_config.user_id != user_id:
+            raise PermissionError("您没有权限使用此 LLM 配置")
+        return user_llm_config
 
     async def agent_stream(self, chat_dto: ChatDTO) -> AsyncGenerator[str, None]:
         """
@@ -110,8 +136,7 @@ class ChatService:
         inputs = await self.load_inputs(chat_dto)
 
         # 模型选择
-        user_llm_config_id = chat_dto.llm_config_id
-        user_llm_config: LlmConfig = await self.llm_config_dao.get_config_by_id(llm_config_id=user_llm_config_id)
+        user_llm_config = await self._validate_llm_config(chat_dto.user_id, chat_dto.llm_config_id)
         llm_nick_name = user_llm_config.model_nickname
         llm_chat = self.llm_manager.get_llm(llm_nick_name)
 
@@ -215,4 +240,26 @@ class ChatService:
         )
 
     async def normal_chat(self, chat_dto: ChatDTO) -> str:
-        return await self.llm.normal_chat(1, chat_dto.query)
+        """
+        普通的聊天方法，不使用流式响应。
+
+        Args:
+            chat_dto (ChatDTO): 会话请求数据传输对象。
+
+        Returns:
+            str: 模型的响应内容
+
+        Raises:
+            PermissionError: 当用户尝试访问不属于自己的 LLM 配置时抛出
+        """
+        # 获取用户的 LLM 配置
+        user_llm_config: LlmConfig = await self.llm_config_dao.get_config_by_id(llm_config_id=chat_dto.llm_config_id)
+        llm_nick_name = user_llm_config.model_nickname
+        llm_chat = self.llm_manager.get_llm(llm_nick_name)
+        
+        return await llm_chat.normal_chat(
+            inputs=chat_dto.query,
+            api_key=user_llm_config.api_key,
+            base_url=user_llm_config.base_url,
+            model=user_llm_config.model
+        )
