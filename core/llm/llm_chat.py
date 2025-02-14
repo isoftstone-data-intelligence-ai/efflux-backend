@@ -13,16 +13,11 @@ logger = get_logger(__name__)
 class LLMChat(ABC):
     """
     抽象类用于定义与语言模型进行对话的基础接口。
-
-    Attributes:
-        llm_model (LanguageModelLike): 语言模型实例。
     """
 
     def __init__(self):
         """
-        初始化LLMChat类并设置语言模型。
-
-        创建一个新实例时会调用此构造函数来初始化语言模型。
+        初始化
         """
 
     @abstractmethod
@@ -68,7 +63,9 @@ class LLMChat(ABC):
             inputs (Union[dict[str, Any], Any]): 用户输入的数据。
             tools (List[BaseTool]): 工具列表，可以被语言模型使用。
             callback (callable, optional): 完成后的回调函数。
-
+            api_key : 模型api_key
+            base_url : 模型官网访问地址
+            model : 模型名称 & 版本号
         Yields:
             LLMMessage: 包含从语言模型获得的消息或工具调用信息。
         """
@@ -79,6 +76,7 @@ class LLMChat(ABC):
             "tool_errors": []  # 存储工具调用错误
         }
 
+        # llm_model (LanguageModelLike): 语言模型实例
         llm_model = self.get_llm_model(api_key,base_url,model)
 
         graph = create_react_agent(model=llm_model, tools=tools)
@@ -123,6 +121,19 @@ class LLMChat(ABC):
         if callback:
             await callback(collected_data)
 
-    async def normal_chat(self, model_id: int, inputs: str) -> str:
-        result = self.llm_model.invoke([HumanMessage(content=inputs)])
+    async def normal_chat(self, inputs: str, api_key: str, base_url: str, model: str) -> str:
+        """
+        普通的聊天方法，不使用流式响应。
+
+        Args:
+            inputs (str): 用户输入的消息
+            api_key (str): API密钥
+            base_url (str): API Base URL
+            model (str): 模型名称
+
+        Returns:
+            str: 模型的响应内容
+        """
+        llm_model = self.get_llm_model(api_key, base_url, model)
+        result = llm_model.invoke([HumanMessage(content=inputs)])
         return result.content
