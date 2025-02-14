@@ -36,5 +36,8 @@ class LLMManager:
         Raises:
             KeyError: 如果提供的名称不在 `llm_map` 中。
         """
+        providers = set(self.llm_map.keys()) - {"default"}
+        if name not in providers:
+            name = "default"
         return self.llm_map[name]
 
