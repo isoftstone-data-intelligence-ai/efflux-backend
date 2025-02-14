@@ -145,7 +145,8 @@ class ChatService:
         async for chunk in llm_chat.stream_chat(inputs=inputs, tools=tools, callback=data_callback,
                                                 api_key=user_llm_config.api_key,
                                                 base_url=user_llm_config.base_url,
-                                                model=user_llm_config.model):
+                                                model=user_llm_config.model,
+                                                code=chat_dto.code):
             yield json.dumps(chunk.model_dump()) + "\n"
 
     async def load_inputs(self, chat_dto: ChatDTO) -> dict:
