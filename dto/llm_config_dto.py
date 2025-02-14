@@ -4,7 +4,7 @@ from typing import Dict, Optional, Any
 class LLMConfigDTO(BaseModel):
     """用于返回数据和更新操作的 DTO"""
     id: int
-    user_id: int
+    user_id: Optional[int] = None
     template_id: int
     provider: str
     api_key: str
