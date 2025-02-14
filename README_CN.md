@@ -41,6 +41,11 @@ Efflux 是一个基于大语言模型的 Agent 智能体对话客户端，提供
 
 
 
+### 在线演示
+您可以通过访问我们的[在线演示](http://47.236.204.213:3000/login)来体验Efflux的功能。
+
+
+
 ### 环境要求
 - Python 3.12+
 - PostgreSQL
@@ -126,7 +131,13 @@ alembic upgrade head --sql
 alembic upgrade head
 ```
 
-9. 启动服务
+9. 初始化 LLM 模板数据
+```bash
+# 运行初始化脚本
+python scripts/init_llm_templates.py
+```
+
+10. 启动服务
 ```bash
 python -m uvicorn main:app --host 0.0.0.0 --port 8000
 ```
