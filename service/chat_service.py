@@ -137,8 +137,8 @@ class ChatService:
 
         # 模型选择
         user_llm_config = await self._validate_llm_config(chat_dto.user_id, chat_dto.llm_config_id)
-        llm_nick_name = user_llm_config.model_nickname
-        llm_chat = self.llm_manager.get_llm(llm_nick_name)
+        llm_provider = user_llm_config.provider
+        llm_chat = self.llm_manager.get_llm(llm_provider)
 
 
         # 调用语言模型的流式接口，生成响应
