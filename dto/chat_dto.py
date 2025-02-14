@@ -23,3 +23,5 @@ class ChatDTO(BaseModel):
     llm_config_id: int
     # 用户id
     user_id : Optional[int] = None
+    # 是否生成代码
+    code: bool = False

@@ -62,6 +62,25 @@ class ChatService:
             # 获取mcp-server的所有tools并转换为langchain agent tools
             tools = await convert_mcp_to_langchain_tools([server_params])
 
+        # 初始化code模式下系统提示词
+        if chat_dto.code:
+            chat_dto.prompt = """
+             就像网络接口的数据格式json字符串,去掉你的提示语，以及json数据结构外的内容 如下，代码部分放在code字段，其余字段看能否回填
+                {
+                  "commentary": "I will generate a simple 'Hello World' application using the Next.js template. 
+                  This will include a basic page that displays 'Hello World' when accessed.",
+                  "template": "nextjs-developer",
+                  "title": "Hello World",
+                  "description": "A simple Next.js app that displays 'Hello World'.",
+                  "additional_dependencies": [],
+                  "has_additional_dependencies": false,
+                  "install_dependencies_command": "",
+                  "port": 3000,
+                  "file_path": "pages/index.tsx",
+                  "code": ""
+                }
+            """
+
         # 定义回调方法，用于收集模型返回的数据
         async def data_callback(collected_data):
             user_query = chat_dto.query
