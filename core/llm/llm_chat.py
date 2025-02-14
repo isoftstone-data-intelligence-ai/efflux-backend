@@ -53,7 +53,7 @@ class LLMChat(ABC):
         """
 
     async def stream_chat(self, inputs: Union[dict[str, Any], Any], tools: List[BaseTool],
-                          api_key: str, base_url: str, model: str,
+                          api_key: str, base_url: str, model: str, code: bool,
                           callback=None) -> \
             AsyncGenerator[LLMMessage, None]:
         """
@@ -63,9 +63,10 @@ class LLMChat(ABC):
             inputs (Union[dict[str, Any], Any]): 用户输入的数据。
             tools (List[BaseTool]): 工具列表，可以被语言模型使用。
             callback (callable, optional): 完成后的回调函数。
-            api_key : 模型api_key
-            base_url : 模型官网访问地址
-            model : 模型名称 & 版本号
+            api_key (str): 模型api_key
+            base_url (str): 模型官网访问地址
+            model (str): 模型名称 & 版本号
+            code (bool): 代码模式开关 true 开启，返回的LLMMessage需要标识为code，false 关闭，普通会话
         Yields:
             LLMMessage: 包含从语言模型获得的消息或工具调用信息。
         """
@@ -89,7 +90,11 @@ class LLMChat(ABC):
                     if message_chunk.content != '':
                         # chat结果收集
                         collected_data["messages"].append(message_chunk.content)
-                        yield LLMMessage(content=message_chunk.content, type="message")
+                        # 代码模式
+                        if code:
+                            yield LLMMessage(content=message_chunk.content, type="code")
+                        else:
+                            yield LLMMessage(content=message_chunk.content, type="message")
             elif isinstance(chunk, dict) and "messages" in chunk:
                 # Print a newline after the complete message
                 print("newline\n", flush=True)
