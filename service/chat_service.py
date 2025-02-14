@@ -75,7 +75,7 @@ class ChatService:
         """
         # 判断是否需要创建会话
         if not chat_dto.chat_id:
-            new_chat_window_id = await self.create_chat(chat_dto.user_id, chat_dto.query)
+            chat_dto.chat_id = await self.create_chat(chat_dto.user_id, chat_dto.query)
         # 初始化 langchain agent 工具列表
         tools = []
         if chat_dto.server_id:
@@ -114,21 +114,21 @@ class ChatService:
             if "messages" in collected_data and collected_data["messages"]:
                 assistant_reply = ''.join(collected_data["messages"])
 
+                # 使用user_id和chat_id组合创建唯一键
+                combined_id = f"{chat_dto.user_id}_{chat_dto.chat_id}"
+
                 # 初始化或更新用户的历史记录
-                if chat_dto.user_id not in self.user_history_dict:
-                    self.user_history_dict[chat_dto.user_id] = []
-                self.user_history_dict[chat_dto.user_id].append({
-                    "user": chat_dto.query,
+                if combined_id not in self.user_history_dict:
+                    self.user_history_dict[combined_id] = []
+                self.user_history_dict[combined_id].append({
+                    "user": user_query,
                     "assistant": assistant_reply
                 })
-                # 保留最近 3 条历史记录
-                self.user_history_dict[chat_dto.user_id] = self.user_history_dict[chat_dto.user_id][-3:]
+                # 保留最近3条历史记录
+                self.user_history_dict[combined_id] = self.user_history_dict[combined_id][-3:]
+
                 # 更新会话历史记录
-                if chat_dto.chat_id is None:
-                    chat_window_id = new_chat_window_id
-                else:
-                    chat_window_id = chat_dto.chat_id
-                await self.update_chat_window(chat_window_id, user_query, assistant_reply)
+                await self.update_chat_window(chat_dto.chat_id, user_query, assistant_reply)
             for tool_call in collected_data["tool_calls"]:
                 print("--->tool_call:", tool_call)
 
