@@ -11,11 +11,14 @@ from dao.chat_window_dao import ChatWindowDAO
 from dao.mcp_server_dao import MCPServerDAO
 from service.chat_service import ChatService
 from service.chat_window_service import ChatWindowService
+from service.file_service import FileService
 from service.mcp_config_service import MCPConfigService
+from service.storage_strategy import OSSStorageStrategy, LocalStorageStrategy
 from service.user_service import UserService
 from core.llm.azure_open_ai import AzureLlm
 from service.llm_service import LLMService
-
+from dotenv import load_dotenv
+import os
 
 class Container(containers.DeclarativeContainer):
     # 注册数据库会话提供器
@@ -66,4 +69,33 @@ class Container(containers.DeclarativeContainer):
                                        llm_config_dao=llm_config_dao,
                                        llm_manager=llm_manager)
 
+    load_dotenv()
+    ACCESS_KEY_ID = os.getenv('ACCESS_KEY_ID')
+    ACCESS_KEY_SECRET = os.getenv('ACCESS_KEY_SECRET')
+    BUCKET_NAME = os.getenv('BUCKET_NAME')
+    ENDPOINT = os.getenv('ENDPOINT')
+    oss_strategy = providers.Factory(
+        OSSStorageStrategy,
+        access_key_id=os.getenv('ACCESS_KEY_ID'),
+        access_key_secret=os.getenv('ACCESS_KEY_SECRET'),
+        bucket_name=os.getenv('BUCKET_NAME'),
+        endpoint=os.getenv('ENDPOINT')
+    )
 
+    local_strategy = providers.Factory(LocalStorageStrategy)
+
+    # 默认使用local策略
+    strategy = providers.Object(local_strategy)
+
+    file_service = providers.Factory(
+        FileService,
+        strategy=strategy
+    )
+
+    @classmethod
+    def switch_to_oss(cls):
+        cls.strategy.override(cls.oss_strategy)
+
+    @classmethod
+    def switch_to_local(cls):
+        cls.strategy.override(cls.local_strategy)
