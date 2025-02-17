@@ -1,5 +1,5 @@
 from extensions.ext_database import Base
-from sqlalchemy import Column, BigInteger, String, Integer
+from sqlalchemy import Column, BigInteger, String, Integer, ARRAY
 
 
 class ArtifactsTemplate(Base):
@@ -8,10 +8,10 @@ class ArtifactsTemplate(Base):
     id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
     template_name = Column(String(100), nullable=False)
     name = Column(String(100), nullable=False)
-    lib = Column(String(500), nullable=False)
+    lib = Column(ARRAY(String), nullable=False)
     file = Column(String(100), nullable=False)
     instructions = Column(String(255), nullable=False)
-    port = Column(Integer)
+    port = Column(Integer, nullable=True)
 
 
 
