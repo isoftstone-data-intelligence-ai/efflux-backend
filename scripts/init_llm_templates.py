@@ -10,6 +10,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import select
 from dotenv import load_dotenv
 from model.llm_template import LlmTemplate
+from model.artifacts_template import ArtifactsTemplate
 
 # 加载环境变量
 load_dotenv()
@@ -84,14 +85,58 @@ TEMPLATES = [
     },
 ]
 
+# 添加 Artifacts 模板数据
+ARTIFACTS_TEMPLATES = [
+    {
+        "template_name": "code-interpreter-v1",
+        "name": "Python data analyst",
+        "lib": ["python", "jupyter", "numpy", "pandas", "matplotlib", "seaborn", "plotly"],
+        "file": "script.py",
+        "instructions": "Runs code as a Jupyter notebook cell. Strong data analysis angle. Can use complex visualisation to explain results.",
+        "port": None
+    },
+    {
+        "template_name": "nextjs-developer",
+        "name": "Next.js developer",
+        "lib": ["nextjs@14.2.5", "typescript", "@types/node", "@types/react", "@types/react-dom", "postcss", "tailwindcss", "shadcn"],
+        "file": "pages/index.tsx",
+        "instructions": "A Next.js 13+ app that reloads automatically. Using the pages router.",
+        "port": 3000
+    },
+    {
+        "template_name": "vue-developer",
+        "name": "Vue.js developer",
+        "lib": ["vue@latest", "nuxt@3.13.0", "tailwindcss"],
+        "file": "app.vue",
+        "instructions": "A Vue.js 3+ app that reloads automatically. Only when asked specifically for a Vue app.",
+        "port": 3000
+    },
+    {
+        "template_name": "streamlit-developer",
+        "name": "Streamlit developer",
+        "lib": ["streamlit", "pandas", "numpy", "matplotlib", "request", "seaborn", "plotly"],
+        "file": "app.py",
+        "instructions": "A streamlit app that reloads automatically.",
+        "port": 8501
+    },
+    {
+        "template_name": "gradio-developer",
+        "name": "Gradio developer",
+        "lib": ["gradio", "pandas", "numpy", "matplotlib", "request", "seaborn", "plotly"],
+        "file": "app.py",
+        "instructions": "A gradio app. Gradio Blocks/Interface should be called demo.",
+        "port": 7860
+    }
+]
+
 async def init_templates():
     """初始化 LLM 模板数据"""
     async with AsyncSessionLocal() as session:
         try:
             # 检查是否已存在数据
             result = await session.execute(select(LlmTemplate))
-            if result.scalar_one_or_none():
-                print("模板数据已存在，跳过初始化...")
+            if result.first():
+                print("[LLM Templates] 数据已存在，跳过初始化...")
                 return
 
             # 插入模板数据
@@ -100,15 +145,36 @@ async def init_templates():
                 session.add(template)
             
             await session.commit()
-            print("成功初始化 LLM 模板数据！")
+            print(f"[LLM Templates] 成功初始化 {len(TEMPLATES)} 条模板数据！")
         except Exception as e:
             await session.rollback()
-            print(f"初始化模板时出错: {e}")
-            raise
+            print(f"[LLM Templates] 初始化失败: {str(e)}")
+
+async def init_artifacts_templates():
+    """初始化 Artifacts 模板数据"""
+    async with AsyncSessionLocal() as session:
+        try:
+            # 检查是否已存在数据
+            result = await session.execute(select(ArtifactsTemplate))
+            if result.first():
+                print("[Artifacts Templates] 数据已存在，跳过初始化...")
+                return
+
+            # 插入模板数据
+            for template_data in ARTIFACTS_TEMPLATES:
+                template = ArtifactsTemplate(**template_data)
+                session.add(template)
+            
+            await session.commit()
+            print(f"[Artifacts Templates] 成功初始化 {len(ARTIFACTS_TEMPLATES)} 条模板数据！")
+        except Exception as e:
+            await session.rollback()
+            print(f"[Artifacts Templates] 初始化失败: {str(e)}")
 
 async def main():
     try:
         await init_templates()
+        await init_artifacts_templates()
     finally:
         await engine.dispose()
 
