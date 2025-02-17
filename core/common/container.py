@@ -15,6 +15,8 @@ from service.mcp_config_service import MCPConfigService
 from service.user_service import UserService
 from core.llm.azure_open_ai import AzureLlm
 from service.llm_service import LLMService
+from dao.artifacts_template_dao import ArtifactsTemplateDAO
+from service.artifacts_template_service import ArtifactsService
 
 
 class Container(containers.DeclarativeContainer):
@@ -35,6 +37,11 @@ class Container(containers.DeclarativeContainer):
     chat_window_dao = providers.Singleton(ChatWindowDAO, session_factory=database_provider.provided.session_factory)
     # 注册chat_window Service
     chat_window_service = providers.Singleton(ChatWindowService, chat_window_dao=chat_window_dao)
+
+    # 注册 artifacts_template DAO
+    artifacts_template_dao = providers.Singleton(ArtifactsTemplateDAO, session_factory=database_provider.provided.session_factory)
+    # 注册 artifacts_template Service
+    artifacts_service = providers.Singleton(ArtifactsService, artifacts_template_dao=artifacts_template_dao)
 
     # 注册llm_config DAO
     llm_config_dao = providers.Singleton(LlmConfigDAO, session_factory=database_provider.provided.session_factory)
