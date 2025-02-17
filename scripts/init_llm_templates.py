@@ -48,13 +48,6 @@ TEMPLATES = [
         "model_variable": "Model",
     },
     {
-        "provider": "阿里",
-        "model_display_name": "qwen-max",
-        "api_key_variable": "API Key",
-        "base_url_variable": "Base URL",
-        "model_variable": "Model",
-    },
-    {
         "provider": "Deepseek",
         "model_display_name": "deepseek-r1",
         "api_key_variable": "API Key",
@@ -64,6 +57,13 @@ TEMPLATES = [
     {
         "provider": "Ollama",
         "model_display_name": "deepseek-r1:8b",
+        "api_key_variable": "API Key",
+        "base_url_variable": "Base URL",
+        "model_variable": "Model",
+    },
+    {
+        "provider": "阿里",
+        "model_display_name": "qwen-max",
         "api_key_variable": "API Key",
         "base_url_variable": "Base URL",
         "model_variable": "Model",
