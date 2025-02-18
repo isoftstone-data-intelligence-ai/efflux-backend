@@ -140,14 +140,37 @@ class ChatService:
         llm_provider = user_llm_config.provider
         llm_chat = self.llm_manager.get_llm(llm_provider)
 
+        # 标准流式 chat 流程 / artifacts 流程分流
+        if chat_dto.code:
+            # 走 artifacts 流程
+            # 构建消息字典格式
+            messages = {
+                "messages": [{"role": "user", "content": chat_dto.query}]
+            }
 
-        # 调用语言模型的流式接口，生成响应
-        async for chunk in llm_chat.stream_chat(inputs=inputs, tools=tools, callback=data_callback,
-                                                api_key=user_llm_config.api_key,
-                                                base_url=user_llm_config.base_url,
-                                                model=user_llm_config.model,
-                                                code=chat_dto.code):
-            yield json.dumps(chunk.model_dump()) + "\n"
+            # 调试用：打印所有将要发送给模型的消息
+            print(">>> 模型输入 messages：")
+            print(f"messages: {messages}")
+
+            async for chunk in llm_chat.stream_chat(inputs=messages, tools=tools, callback=None,
+                                                    api_key=user_llm_config.api_key,
+                                                    base_url=user_llm_config.base_url,
+                                                    model=user_llm_config.model,
+                                                    code=chat_dto.code):
+                yield json.dumps(chunk.model_dump()) + "\n"
+
+        else:
+            # 标准流式 chat 流程
+            async for chunk in llm_chat.stream_chat(inputs=inputs, tools=tools, callback=data_callback,
+                                                    api_key=user_llm_config.api_key,
+                                                    base_url=user_llm_config.base_url,
+                                                    model=user_llm_config.model,
+                                                    code=chat_dto.code):
+                yield json.dumps(chunk.model_dump()) + "\n"
+
+
+
+
 
     async def load_inputs(self, chat_dto: ChatDTO) -> dict:
         """
