@@ -25,3 +25,5 @@ class ChatDTO(BaseModel):
     user_id : Optional[int] = None
     # 是否生成代码
     code: bool = False
+    # artifacts 模板id 0 : auto
+    artifacts_template_id: Optional[int] = None
