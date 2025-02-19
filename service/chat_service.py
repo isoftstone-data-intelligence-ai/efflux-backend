@@ -124,33 +124,21 @@ class ChatService:
         llm_provider = user_llm_config.provider
         llm_chat = self.llm_manager.get_llm(llm_provider)
 
-        # 标准流式 chat 流程 / artifacts 流程分流
+        # 构造模型的输入内容
+        # chat / artifacts 分流
         if chat_dto.code:
             # 走 artifacts 流程
-            # 构建消息字典格式
-            messages = {
-                "messages": [{"role": "user", "content": chat_dto.query}]
-            }
-
-            # 调试用：打印所有将要发送给模型的消息
-            print(">>> 模型输入 messages：")
-            print(f"messages: {messages}")
-
-            async for chunk in llm_chat.stream_chat(inputs=messages, tools=tools, callback=None,
-                                                    api_key=user_llm_config.api_key,
-                                                    base_url=user_llm_config.base_url,
-                                                    model=user_llm_config.model,
-                                                    code=chat_dto.code):
-                yield json.dumps(chunk.model_dump()) + "\n"
-
+            inputs = await self.load_artifacts_inputs(chat_dto)
         else:
             # 标准流式 chat 流程
-            async for chunk in llm_chat.stream_chat(inputs=inputs, tools=tools, callback=data_callback,
-                                                    api_key=user_llm_config.api_key,
-                                                    base_url=user_llm_config.base_url,
-                                                    model=user_llm_config.model,
-                                                    code=chat_dto.code):
-                yield json.dumps(chunk.model_dump()) + "\n"
+            inputs = await self.load_inputs(chat_dto)
+
+        async for chunk in llm_chat.stream_chat(inputs=inputs, tools=tools, callback=data_callback,
+                                                api_key=user_llm_config.api_key,
+                                                base_url=user_llm_config.base_url,
+                                                model=user_llm_config.model,
+                                                code=chat_dto.code):
+            yield json.dumps(chunk.model_dump()) + "\n"
 
     async def load_inputs(self, chat_dto: ChatDTO) -> dict:
         """
@@ -170,6 +158,63 @@ class ChatService:
         # 如果有，将其作为 system 角色的消息添加到列表中
         if chat_dto.prompt:
             messages.append(("system", chat_dto.prompt))
+
+        # 添加最近 3 条用户历史记录
+        if chat_dto.user_id in self.user_history_dict:
+            for record in self.user_history_dict[chat_dto.user_id][-3:]:
+                # 每条历史记录都包含用户的问题和 AI 的回答
+                # 按照时间顺序添加到消息列表中
+                messages.append(("user", record["user"]))  # 用户的历史问题
+                messages.append(("assistant", record["assistant"]))  # AI 的历史回答
+
+        # 将当前用户的新问题添加到消息列表的最后
+        messages.append(("user", chat_dto.query))
+
+        # 调试用：打印所有将要发送给模型的消息
+        print(">>> 模型输入 messages：")
+        for role, content in messages:
+            print(f"{role}: {content}")
+
+        # 返回一个包含所有消息的字典
+        # 这个格式是 LLM API 所需的标准格式
+        return {"messages": messages}
+
+    async def load_artifacts_inputs(self, chat_dto: ChatDTO) -> dict:
+        """
+        加载模型输入内容
+
+        根据用户请求，拼接提示词、历史记录和当前问题，构造模型的输入。
+
+        Args:
+            chat_dto (ChatDTO): 会话请求数据传输对象。
+
+        Returns:
+            dict: 拼装好的模型输入，包含消息列表。
+        """
+        # 初始化一个空的消息列表，用于存储所有要发送给模型的消息
+        messages = []
+        # 检查是否有系统提示词（prompt）
+        # 如果有，将其作为 system 角色的消息添加到列表中
+        prompt = """{
+            "You are a skilled software engineer.\nYou do not make mistakes.\nGenerate an fragment.\nYou can install additional dependencies.\nDo not touch project dependencies files like package.json, package-lock.json, requirements.txt, etc.\nYou can use one of the following templates:\n1. code-interpreter-v1: \"Runs code as a Jupyter notebook cell. Strong data analysis angle. Can use complex visualisation to explain results.\". File: script.py. Dependencies installed: python, jupyter, numpy, pandas, matplotlib, seaborn, plotly. Port: none.\n2. nextjs-developer: \"A Next.js 13+ app that reloads automatically. Using the pages router.\". File: pages/index.tsx. Dependencies installed: nextjs@14.2.5, typescript, @types/node, @types/react, @types/react-dom, postcss, tailwindcss, shadcn. Port: 3000.\n3. vue-developer: \"A Vue.js 3+ app that reloads automatically. Only when asked specifically for a Vue app.\". File: app.vue. Dependencies installed: vue@latest, nuxt@3.13.0, tailwindcss. Port: 3000.\n4. streamlit-developer: \"A streamlit app that reloads automatically.\". File: app.py. Dependencies installed: streamlit, pandas, numpy, matplotlib, request, seaborn, plotly. Port: 8501.\n5. gradio-developer: \"A gradio app. Gradio Blocks/Interface should be called demo.\". File: app.py. Dependencies installed: gradio, pandas, numpy, matplotlib, request, seaborn, plotly. Port: 7860.",
+            
+        }
+
+        就像网络接口的数据格式json字符串,去掉你的提示语，以及json数据结构外的内容 如下，代码部分放在code字段，其余字段看能否回填
+
+        {
+            "commentary": "I will generate a simple 'Hello World' application using the Next.js template. This will include a basic page that displays 'Hello World' when accessed.",
+            "template": "nextjs-developer",
+            "title": "Hello World",
+            "description": "A simple Next.js app that displays 'Hello World'.",
+            "additional_dependencies": [],
+            "has_additional_dependencies": false,
+            "install_dependencies_command": "",
+            "port": 3000,
+            "file_path": "pages/index.tsx",
+            "code": ""
+        }"""
+        messages.append(("system", prompt))
 
         # 添加最近 3 条用户历史记录
         if chat_dto.user_id in self.user_history_dict:
