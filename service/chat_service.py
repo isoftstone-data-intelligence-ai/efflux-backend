@@ -95,7 +95,7 @@ class ChatService:
         # 定义回调方法，用于收集模型返回的数据
         async def data_callback(collected_data):
             user_query = chat_dto.query
-            print("--->messages:", ''.join(collected_data["messages"]))
+            # print("--->messages:", ''.join(collected_data["messages"]))
             if "messages" in collected_data and collected_data["messages"]:
                 assistant_reply = ''.join(collected_data["messages"])
 
@@ -248,10 +248,17 @@ class ChatService:
 
         # 构建新会话 content
         content_user = ContentDTO(type="text", text=query)
-
-        # 判断 reply 是否为 CodeInterpreterObject 格式
+        
+        # 判断 reply 是否为包含 JSON 的文本
         try:
-            code_interpreter_obj = json.loads(reply)
+            # 尝试从文本中提取 JSON 字符串
+            json_str = reply.strip()
+            if json_str.startswith("```json\n"):
+                json_str = json_str[8:]  # 移除 ```json\n
+            if json_str.endswith("\n```"):
+                json_str = json_str[:-4]  # 移除 \n```
+            
+            code_interpreter_obj = json.loads(json_str)
             if all(key in code_interpreter_obj for key in ["commentary", "template", "code"]):
                 # 创建文本类型的 ContentDTO（使用 commentary）
                 content_commentary = ContentDTO(type="text", text=code_interpreter_obj["commentary"])
@@ -259,7 +266,7 @@ class ChatService:
                 content_code = ContentDTO(type="code", text=code_interpreter_obj["code"])
                 # 创建 CodeInterpreterObjectDTO 对象
                 object_dto = CodeInterpreterObjectDTO(**code_interpreter_obj)
-
+                
                 chat_message_assistant = ChatMessageDTO(
                     role="assistant",
                     content=[content_commentary, content_code],
@@ -272,8 +279,8 @@ class ChatService:
                     role="assistant",
                     content=[content_assistant]
                 )
-        except json.JSONDecodeError:
-            # 如果不是 JSON 格式，使用默认文本格式
+        except (json.JSONDecodeError, AttributeError):
+            # 如果不是 JSON 格式或字符串处理出错，使用默认文本格式
             content_assistant = ContentDTO(type="text", text=reply)
             chat_message_assistant = ChatMessageDTO(
                 role="assistant",
@@ -333,9 +340,6 @@ class ChatService:
         system_prompt = self.templates_to_prompt(artifacts_templates)
 
         messages = []
-
-        messages.append(("system", system_prompt))
-
         # 根据chat_id查询历史记录
         # if chat_dto.chat_id:
         #     chat_window = await self.chat_window_dao.get_chat_window_by_id(chat_dto.chat_window_id)
@@ -352,35 +356,23 @@ class ChatService:
         # 拼接最后一次query
         messages.append(("user", query))
         # 方案二：将历史记录拼接到system prompt ,并固定提示词 ex: 参考下面的对话历史记录，完成query的内容
-
-        # 调试用：打印所有将要发送给模型的消息
-        print(">>> system_prompt：")
-        print(system_prompt)
-        print(">>> 模型输入 messages：")
-        for role, content in messages:
-            print(f"{role}: {content}")
-
-        # return {
-        #     "system": system_prompt,
-        #     "messages": messages
-        # }
-
-        return {"messages": messages}
+        return {
+            "system": system_prompt,
+            "messages": messages
+        }
 
     @staticmethod
     def templates_to_prompt(templates: List[ArtifactsTemplate]) -> str:
         # 系统提示词
-        system_prompt = """{
+        system_prompt = """
                 You are a skilled software engineer.
                 You do not make mistakes.
                 Generate an fragment.
                 You can install additional dependencies.
                 Do not touch project dependencies files like package.json, package-lock.json, requirements.txt, etc.
-                You can use one of the following templates:\n%s.
-                
+                You can use one of the following templates:%s.
                 And please provide your response in JSON format without any additional explanations or comments.
                 The response must follow this schema structure, with the code placed in the code field.
-                
                 schema:{
                     "commentary": "I will generate a simple 'Hello World' application using the Next.js template. This will include a basic page that displays 'Hello World' when accessed.",
                     "template": "nextjs-developer",
@@ -392,15 +384,15 @@ class ChatService:
                     "port": 3000,
                     "file_path": "pages/index.tsx",
                     "code": ""
-                }
-"""
+                }   
+                """
         prompt_lines = []
         for index, template in enumerate(templates, 1):
             file_info = template.file or 'none'
             libs = ', '.join(template.lib or [])
             port = template.port or 'none'
 
-            prompt_line = f"{index}. {template.template_name}: \"{template.instructions}\". File: {file_info}. Dependencies installed: {libs}. Port: {port}."
+            prompt_line = f"{index}. {template.name}: \"{template.instructions}\". File: {file_info}. Dependencies installed: {libs}. Port: {port}."
             prompt_lines.append(prompt_line)
 
         # 模板字符串    
@@ -410,7 +402,10 @@ class ChatService:
         json_schema = ArtifactsSchema.model_json_schema()
 
         # 构建最终的系统提示词，替换两个占位符
-        return system_prompt % templates_str
+        return system_prompt.format(
+            templates_list=templates_str,
+            json_schema=json.dumps(json_schema, indent=2, ensure_ascii=False)
+        )
 
     async def normal_chat(self, chat_dto: ChatDTO) -> str:
         """
