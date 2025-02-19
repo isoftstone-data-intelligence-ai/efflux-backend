@@ -1,7 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
 
-class Fragment(BaseModel):
+class ArtifactsSchema(BaseModel):
     """代码片段模型，用于定义生成代码片段时所需的所有相关信息"""
 
     # 详细说明生成代码片段的步骤和计划

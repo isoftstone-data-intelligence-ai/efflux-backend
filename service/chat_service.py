@@ -4,6 +4,7 @@ from core.mcp.convert_mcp_tools import convert_mcp_to_langchain_tools
 from dao.artifacts_template_dao import ArtifactsTemplateDAO
 from dao.chat_window_dao import ChatWindowDAO
 from dao.llm_config_dao import LlmConfigDAO
+from dto.artifacts_schema import ArtifactsSchema
 from dto.chat_dto import ChatDTO
 from dto.chat_window_dto import ContentDTO, ChatMessageDTO
 from model.artifacts_template import ArtifactsTemplate
@@ -291,20 +292,28 @@ class ChatService:
     async def build_artifacts_inputs(self, chat_dto: ChatDTO) -> dict:
         """
         字典结构
-        messages:
+        inputs:
             system : str        # 系统提示词
-            user : str          # 用户query
-            assistant : str     # AI的回答
+            messages: [
+                {user : str}          # 用户query
+                {assistant : str}     # AI的回答
+            ]
+
         :param chat_dto:
         :return:
         """
+
         artifacts_templates = []
         if chat_dto.artifacts_template_id != 0:
+            # artifacts_template_id非0表示选择某一个模板，根据id从DB获取模板
             artifacts_template = await self.artifacts_template_dao.get_artifact_template_by_id(
                 chat_dto.artifacts_template_id)
             artifacts_templates.append(artifacts_template)
         else:
+            # artifacts_template_id为0表示AUTO模式，从DB获取全部模板
             artifacts_templates = await self.artifacts_template_dao.get_all_artifact_templates()
+        # 提示词
+        system_prompt = self.templates_to_prompt(artifacts_templates)
 
         messages = []
         # 根据chat_id查询历史记录
@@ -318,7 +327,10 @@ class ChatService:
         # 拼接最后一次query
         messages.append(("user", query))
         # 方案二：将历史记录拼接到system prompt ,并固定提示词 ex: 参考下面的对话历史记录，完成query的内容
-        return {"messages": messages}
+        return {
+            "system": system_prompt,
+            "messages": messages
+        }
 
     @staticmethod
     def templates_to_prompt(templates: List[ArtifactsTemplate]) -> str:
@@ -329,7 +341,10 @@ class ChatService:
                 Generate an fragment.
                 You can install additional dependencies.
                 Do not touch project dependencies files like package.json, package-lock.json, requirements.txt, etc.
-                You can use one of the following templates:{templates_list}
+                You can use one of the following templates:{templates_list}.
+                And please provide your response in JSON format without any additional explanations or comments.
+                The response must follow this schema structure, with the code placed in the code field:
+                schema:{json_schema}
                 """
         prompt_lines = []
         for index, template in enumerate(templates, 1):
@@ -339,9 +354,18 @@ class ChatService:
 
             prompt_line = f"{index}. {template.name}: \"{template.instructions}\". File: {file_info}. Dependencies installed: {libs}. Port: {port}."
             prompt_lines.append(prompt_line)
+
         # 模板字符串    
         templates_str = '\n'.join(prompt_lines)
-        return system_prompt.format(templates_list=templates_str)
+
+        # 获取 ArtifactsTemplateDTO 的 JSON Schema
+        json_schema = ArtifactsSchema.model_json_schema()
+
+        # 构建最终的系统提示词，替换两个占位符
+        return system_prompt.format(
+            templates_list=templates_str,
+            json_schema=json.dumps(json_schema, indent=2, ensure_ascii=False)
+        )
 
     async def normal_chat(self, chat_dto: ChatDTO) -> str:
         """
