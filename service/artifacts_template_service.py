@@ -36,6 +36,7 @@ class ArtifactsService:
         # lib_list = model.lib.split(',') if model.lib else []
         
         return ArtifactsTemplateDTO(
+            id=model.id,
             template_name=model.template_name,
             name=model.name,
             lib=model.lib,
