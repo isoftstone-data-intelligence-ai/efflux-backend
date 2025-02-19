@@ -387,6 +387,7 @@ class ChatService:
                 
                 And please provide your response in JSON format without any additional explanations or comments.
                 The response must follow this schema structure, with the code placed in the code field.
+                Use the same language matching the user's language when filling the commentary section.
                 
                 schema:{
                     "commentary": "I will generate a simple 'Hello World' application using the Next.js template. This will include a basic page that displays 'Hello World' when accessed.",
