@@ -74,18 +74,21 @@ class Container(containers.DeclarativeContainer):
     ACCESS_KEY_SECRET = os.getenv('ACCESS_KEY_SECRET')
     BUCKET_NAME = os.getenv('BUCKET_NAME')
     ENDPOINT = os.getenv('ENDPOINT')
-    oss_strategy = providers.Factory(
+
+    # 创建OSS存储策略工厂
+    oss_strategy_factory = providers.Factory(
         OSSStorageStrategy,
-        access_key_id=os.getenv('ACCESS_KEY_ID'),
-        access_key_secret=os.getenv('ACCESS_KEY_SECRET'),
-        bucket_name=os.getenv('BUCKET_NAME'),
-        endpoint=os.getenv('ENDPOINT')
+        access_key_id=ACCESS_KEY_ID,
+        access_key_secret=ACCESS_KEY_SECRET,
+        bucket_name=BUCKET_NAME,
+        endpoint=ENDPOINT
     )
 
-    local_strategy = providers.Factory(LocalStorageStrategy)
+    # 创建本地存储策略工厂
+    local_strategy_factory = providers.Factory(LocalStorageStrategy)
 
-    # 默认使用local策略
-    strategy = providers.Object(local_strategy)
+    # 默认使用本地存储策略的实际实例
+    strategy = providers.Singleton(local_strategy_factory)
 
     file_service = providers.Factory(
         FileService,
@@ -93,9 +96,13 @@ class Container(containers.DeclarativeContainer):
     )
 
     @classmethod
-    def switch_to_oss(cls):
-        cls.strategy.override(cls.oss_strategy)
+    def switch_to_oss(cls, oss_strategy_factory=None):
+        # 切换到OSS策略
+        global strategy
+        strategy = providers.Singleton(oss_strategy_factory)
 
     @classmethod
-    def switch_to_local(cls):
-        cls.strategy.override(cls.local_strategy)
+    def switch_to_local(cls, local_strategy_factory=None):
+        # 切换回本地策略
+        global strategy
+        strategy = providers.Singleton(local_strategy_factory)
