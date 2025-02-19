@@ -69,6 +69,7 @@ class Container(containers.DeclarativeContainer):
                                        llm_config_dao=llm_config_dao,
                                        llm_manager=llm_manager)
 
+    # 加载环境变量
     load_dotenv()
     ACCESS_KEY_ID = os.getenv('ACCESS_KEY_ID')
     ACCESS_KEY_SECRET = os.getenv('ACCESS_KEY_SECRET')
@@ -86,23 +87,16 @@ class Container(containers.DeclarativeContainer):
 
     # 创建本地存储策略工厂
     local_strategy_factory = providers.Factory(LocalStorageStrategy)
-
     # 默认使用本地存储策略的实际实例
     strategy = providers.Singleton(local_strategy_factory)
 
-    file_service = providers.Factory(
-        FileService,
-        strategy=strategy
-    )
+    file_service = providers.Factory(FileService, strategy=strategy)
 
     @classmethod
-    def switch_to_oss(cls, oss_strategy_factory=None):
-        # 切换到OSS策略
-        global strategy
-        strategy = providers.Singleton(oss_strategy_factory)
-
+    def switch_to_oss(cls):
+        cls.strategy = providers.Singleton(cls.oss_strategy_factory)
+        cls.file_service = providers.Factory(FileService, strategy=cls.strategy)  # 更新file_service
     @classmethod
-    def switch_to_local(cls, local_strategy_factory=None):
-        # 切换回本地策略
-        global strategy
-        strategy = providers.Singleton(local_strategy_factory)
+    def switch_to_local(cls):
+        cls.strategy = providers.Singleton(cls.local_strategy_factory)
+        cls.file_service = providers.Factory(FileService, strategy=cls.strategy)  # 更新file_service
