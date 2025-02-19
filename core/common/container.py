@@ -71,6 +71,7 @@ class Container(containers.DeclarativeContainer):
                                        mcp_config_service=mcp_config_service,
                                        chat_window_dao=chat_window_dao,
                                        llm_config_dao=llm_config_dao,
+                                       artifacts_template_dao=artifacts_template_dao,
                                        llm_manager=llm_manager)
 
 
