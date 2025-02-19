@@ -117,7 +117,7 @@ class ChatService:
                 print("--->tool_call:", tool_call)
 
         # 构造模型的输入内容
-        inputs = await self.load_inputs(chat_dto)
+        # inputs = await self.load_inputs(chat_dto)
 
         # 模型选择
         user_llm_config = await self._validate_llm_config(chat_dto.user_id, chat_dto.llm_config_id)
