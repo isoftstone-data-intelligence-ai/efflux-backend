@@ -358,8 +358,19 @@ class ChatService:
                 Do not touch project dependencies files like package.json, package-lock.json, requirements.txt, etc.
                 You can use one of the following templates:{templates_list}.
                 And please provide your response in JSON format without any additional explanations or comments.
-                The response must follow this schema structure, with the code placed in the code field:
-                schema:{json_schema}
+                The response must follow this schema structure, with the code placed in the code field.
+                schema:{
+                    "commentary": "I will generate a simple 'Hello World' application using the Next.js template. This will include a basic page that displays 'Hello World' when accessed.",
+                    "template": "nextjs-developer",
+                    "title": "Hello World",
+                    "description": "A simple Next.js app that displays 'Hello World'.",
+                    "additional_dependencies": [],
+                    "has_additional_dependencies": false,
+                    "install_dependencies_command": "",
+                    "port": 3000,
+                    "file_path": "pages/index.tsx",
+                    "code": ""
+                }   
                 """
         prompt_lines = []
         for index, template in enumerate(templates, 1):
