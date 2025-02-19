@@ -6,8 +6,8 @@ from model.artifacts_template import ArtifactsTemplate
 
 
 class ArtifactsService:
-    def __init__(self, artifacts_dao: ArtifactsTemplateDAO):
-        self.artifacts_dao = artifacts_dao
+    def __init__(self, artifacts_template_dao: ArtifactsTemplateDAO):
+        self.artifacts_template_dao = artifacts_template_dao
 
 
     async def get_artifacts_templates(self) -> List[ArtifactsTemplateDTO]:
@@ -17,7 +17,7 @@ class ArtifactsService:
         Returns:
             List[ArtifactsTemplateDTO]: 制品模板 DTO 列表
         """
-        artifacts: List[ArtifactsTemplate] = await self.artifacts_dao.get_all_artifact_templates()
+        artifacts: List[ArtifactsTemplate] = await self.artifacts_template_dao.get_all_artifact_templates()
         return [self.convert_template_model_to_template_dto(artifact) for artifact in artifacts]
 
 
@@ -33,12 +33,12 @@ class ArtifactsService:
             ArtifactsTemplateDTO: 转换后的 DTO 对象
         """
         # 将 lib 字符串转换为列表
-        lib_list = model.lib.split(',') if model.lib else []
+        # lib_list = model.lib.split(',') if model.lib else []
         
         return ArtifactsTemplateDTO(
             template_name=model.template_name,
             name=model.name,
-            lib=lib_list,
+            lib=model.lib,
             file=model.file,
             instructions=model.instructions,
             port=model.port
