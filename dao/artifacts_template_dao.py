@@ -20,3 +20,10 @@ class ArtifactsTemplateDAO:
         async with self._session_factory() as session:
             result = await session.execute(select(ArtifactsTemplate))
             return result.scalars().all()
+
+    async def get_artifact_template_by_id(self, artifact_template_id: int) -> ArtifactsTemplate:
+        async with self._session_factory() as session:
+            artifact_template = await session.execute(
+                select(ArtifactsTemplate).where(ArtifactsTemplate.id == artifact_template_id)
+            )
+            return artifact_template

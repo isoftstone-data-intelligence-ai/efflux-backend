@@ -1,10 +1,12 @@
 from core.llm.llm_manager import LLMChat, LLMManager
 from typing import AsyncGenerator, List, Optional
 from core.mcp.convert_mcp_tools import convert_mcp_to_langchain_tools
+from dao.artifacts_template_dao import ArtifactsTemplateDAO
 from dao.chat_window_dao import ChatWindowDAO
 from dao.llm_config_dao import LlmConfigDAO
 from dto.chat_dto import ChatDTO
 from dto.chat_window_dto import ContentDTO, ChatMessageDTO
+from model.artifacts_template import ArtifactsTemplate
 from model.chat_window import ChatWindow
 from model.llm_config import LlmConfig
 from service.mcp_config_service import MCPConfigService
@@ -20,7 +22,7 @@ class ChatService:
     """
 
     def __init__(self, mcp_config_service: MCPConfigService, chat_window_dao: ChatWindowDAO,
-                 llm_config_dao: LlmConfigDAO, llm_manager: LLMManager):
+                 llm_config_dao: LlmConfigDAO, artifacts_template_dao: ArtifactsTemplateDAO, llm_manager: LLMManager):
         """
         初始化 ChatService
 
@@ -39,6 +41,7 @@ class ChatService:
         """
         self.chat_window_dao = chat_window_dao
         self.llm_config_dao = llm_config_dao
+        self.artifacts_template_dao = artifacts_template_dao
         self.mcp_config_service = mcp_config_service
         self.llm_manager = llm_manager
         self.user_history_dict = {}  # 用于存储每个用户的历史会话记录
@@ -250,6 +253,14 @@ class ChatService:
         :param chat_dto:
         :return:
         """
+        artifacts_templates = []
+        if chat_dto.artifacts_template_id != 0:
+            artifacts_template = await self.artifacts_template_dao.get_artifact_template_by_id(
+                chat_dto.artifacts_template_id)
+            artifacts_templates.append(artifacts_template)
+        else:
+            artifacts_templates = await self.artifacts_template_dao.get_all_artifact_templates()
+
         messages = []
         # 根据chat_id查询历史记录
         if chat_dto.chat_id:
@@ -263,6 +274,29 @@ class ChatService:
         messages.append(("user", query))
         # 方案二：将历史记录拼接到system prompt ,并固定提示词 ex: 参考下面的对话历史记录，完成query的内容
         return {"messages": messages}
+
+    @staticmethod
+    def templates_to_prompt(templates: List[ArtifactsTemplate]) -> str:
+        # 系统提示词
+        system_prompt = """
+                You are a skilled software engineer.
+                You do not make mistakes.
+                Generate an fragment.
+                You can install additional dependencies.
+                Do not touch project dependencies files like package.json, package-lock.json, requirements.txt, etc.
+                You can use one of the following templates:{templates_list}
+                """
+        prompt_lines = []
+        for index, template in enumerate(templates, 1):
+            file_info = template.file or 'none'
+            libs = ', '.join(template.lib or [])
+            port = template.port or 'none'
+
+            prompt_line = f"{index}. {template.name}: \"{template.instructions}\". File: {file_info}. Dependencies installed: {libs}. Port: {port}."
+            prompt_lines.append(prompt_line)
+        # 模板字符串    
+        templates_str = '\n'.join(prompt_lines)
+        return system_prompt.format(templates_list=templates_str)
 
     async def normal_chat(self, chat_dto: ChatDTO) -> str:
         """
