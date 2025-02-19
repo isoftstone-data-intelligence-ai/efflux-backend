@@ -160,9 +160,11 @@ class ChatService:
         if chat_dto.prompt:
             messages.append(("system", chat_dto.prompt))
 
+        # 使用user_id和chat_id组合创建唯一键
+        combined_id = f"{chat_dto.user_id}_{chat_dto.chat_id}"
         # 添加最近 3 条用户历史记录
-        if chat_dto.user_id in self.user_history_dict:
-            for record in self.user_history_dict[chat_dto.user_id][-3:]:
+        if combined_id in self.user_history_dict:
+            for record in self.user_history_dict[combined_id][-3:]:
                 # 每条历史记录都包含用户的问题和 AI 的回答
                 # 按照时间顺序添加到消息列表中
                 messages.append(("user", record["user"]))  # 用户的历史问题
@@ -217,9 +219,11 @@ class ChatService:
         }"""
         messages.append(("system", prompt))
 
+        # 使用user_id和chat_id组合创建唯一键
+        combined_id = f"{chat_dto.user_id}_{chat_dto.chat_id}"
         # 添加最近 3 条用户历史记录
-        if chat_dto.user_id in self.user_history_dict:
-            for record in self.user_history_dict[chat_dto.user_id][-3:]:
+        if combined_id in self.user_history_dict:
+            for record in self.user_history_dict[combined_id][-3:]:
                 # 每条历史记录都包含用户的问题和 AI 的回答
                 # 按照时间顺序添加到消息列表中
                 messages.append(("user", record["user"]))  # 用户的历史问题
@@ -317,11 +321,22 @@ class ChatService:
 
         messages = []
         # 根据chat_id查询历史记录
-        if chat_dto.chat_id:
-            chat_window = await self.chat_window_dao.get_chat_window_by_id(chat_dto.chat_window_id)
-            if chat_window.content:
-                # 方案一：直接将历史记录构建为inputs字典，追加最后一次用户的query
-                messages.append(chat_window.content)
+        # if chat_dto.chat_id:
+        #     chat_window = await self.chat_window_dao.get_chat_window_by_id(chat_dto.chat_window_id)
+        #     if chat_window.content:
+        #         # 方案一：直接将历史记录构建为inputs字典，追加最后一次用户的query
+        #         messages.append(chat_window.content)
+
+        # 使用user_id和chat_id组合创建唯一键
+        combined_id = f"{chat_dto.user_id}_{chat_dto.chat_id}"
+        # 添加最近 3 条用户历史记录
+        if combined_id in self.user_history_dict:
+            for record in self.user_history_dict[combined_id][-3:]:
+                # 每条历史记录都包含用户的问题和 AI 的回答
+                # 按照时间顺序添加到消息列表中
+                messages.append(("user", record["user"]))  # 用户的历史问题
+                messages.append(("assistant", record["assistant"]))  # AI 的历史回答
+
         # 此次对话query
         query = chat_dto.query
         # 拼接最后一次query
