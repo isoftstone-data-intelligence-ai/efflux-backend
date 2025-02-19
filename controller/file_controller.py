@@ -9,7 +9,7 @@ import os
 
 router = APIRouter(prefix="/file", tags=["OSS"])
 # 加载临时文件目录配置
-TEMP_DIR = os.getenv('TEMP_DIR', '/tmp')
+TEMP_DIR = os.getenv('TEMP_DIR')
 
 def get_file_service() -> FileService:
     file_service = Container.file_service()  # 直接获取已注册的服务
@@ -40,20 +40,18 @@ async def download(file_name: str, file_service: FileService = Depends(get_file_
         return FileResponse(path=temp_download_path, filename=file_name)
     except Exception as e:
         raise HTTPException(status_code=404, detail=str(e))
-    finally:
-        if os.path.exists(temp_download_path):
-            os.remove(temp_download_path)  # 删除临时文件
+
 
 
 # 切换为OSS上传下载文件
 @router.post("/switch-to-oss")
 def switch_to_oss():
     Container.switch_to_oss()
-    return {"message": "Switched to OSS"}
+    return result_utils.build_response({"message": "Switched to OSS"})
 
 
 # 切换为本地上传下载文件
 @router.post("/switch-to-local")
 def switch_to_local():
     Container.switch_to_local()
-    return {"message": "Switched to Local"}
+    return result_utils.build_response({"message": "Switched to local"})
