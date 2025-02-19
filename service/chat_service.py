@@ -6,7 +6,7 @@ from dao.chat_window_dao import ChatWindowDAO
 from dao.llm_config_dao import LlmConfigDAO
 from dto.artifacts_schema import ArtifactsSchema
 from dto.chat_dto import ChatDTO
-from dto.chat_window_dto import ContentDTO, ChatMessageDTO
+from dto.chat_window_dto import ContentDTO, ChatMessageDTO, CodeInterpreterObjectDTO
 from model.artifacts_template import ArtifactsTemplate
 from model.chat_window import ChatWindow
 from model.llm_config import LlmConfig
@@ -129,7 +129,7 @@ class ChatService:
         # chat / artifacts 分流
         if chat_dto.code:
             # 走 artifacts 流程
-            inputs = await self.load_artifacts_inputs(chat_dto)
+            inputs = await self.build_artifacts_inputs(chat_dto)
         else:
             # 标准流式 chat 流程
             inputs = await self.load_inputs(chat_dto)
@@ -248,7 +248,7 @@ class ChatService:
 
         # 构建新会话 content
         content_user = ContentDTO(type="text", text=query)
-        
+
         # 判断 reply 是否为 CodeInterpreterObject 格式
         try:
             code_interpreter_obj = json.loads(reply)
@@ -259,7 +259,7 @@ class ChatService:
                 content_code = ContentDTO(type="code", text=code_interpreter_obj["code"])
                 # 创建 CodeInterpreterObjectDTO 对象
                 object_dto = CodeInterpreterObjectDTO(**code_interpreter_obj)
-                
+
                 chat_message_assistant = ChatMessageDTO(
                     role="assistant",
                     content=[content_commentary, content_code],
@@ -333,6 +333,9 @@ class ChatService:
         system_prompt = self.templates_to_prompt(artifacts_templates)
 
         messages = []
+
+        messages.append(("system", system_prompt))
+
         # 根据chat_id查询历史记录
         # if chat_dto.chat_id:
         #     chat_window = await self.chat_window_dao.get_chat_window_by_id(chat_dto.chat_window_id)
@@ -349,23 +352,35 @@ class ChatService:
         # 拼接最后一次query
         messages.append(("user", query))
         # 方案二：将历史记录拼接到system prompt ,并固定提示词 ex: 参考下面的对话历史记录，完成query的内容
-        return {
-            "system": system_prompt,
-            "messages": messages
-        }
+
+        # 调试用：打印所有将要发送给模型的消息
+        print(">>> system_prompt：")
+        print(system_prompt)
+        print(">>> 模型输入 messages：")
+        for role, content in messages:
+            print(f"{role}: {content}")
+
+        # return {
+        #     "system": system_prompt,
+        #     "messages": messages
+        # }
+
+        return {"messages": messages}
 
     @staticmethod
     def templates_to_prompt(templates: List[ArtifactsTemplate]) -> str:
         # 系统提示词
-        system_prompt = """
+        system_prompt = """{
                 You are a skilled software engineer.
                 You do not make mistakes.
                 Generate an fragment.
                 You can install additional dependencies.
                 Do not touch project dependencies files like package.json, package-lock.json, requirements.txt, etc.
-                You can use one of the following templates:%s.
+                You can use one of the following templates:\n%s.
+                
                 And please provide your response in JSON format without any additional explanations or comments.
                 The response must follow this schema structure, with the code placed in the code field.
+                
                 schema:{
                     "commentary": "I will generate a simple 'Hello World' application using the Next.js template. This will include a basic page that displays 'Hello World' when accessed.",
                     "template": "nextjs-developer",
@@ -377,15 +392,15 @@ class ChatService:
                     "port": 3000,
                     "file_path": "pages/index.tsx",
                     "code": ""
-                }   
-                """
+                }
+"""
         prompt_lines = []
         for index, template in enumerate(templates, 1):
             file_info = template.file or 'none'
             libs = ', '.join(template.lib or [])
             port = template.port or 'none'
 
-            prompt_line = f"{index}. {template.name}: \"{template.instructions}\". File: {file_info}. Dependencies installed: {libs}. Port: {port}."
+            prompt_line = f"{index}. {template.template_name}: \"{template.instructions}\". File: {file_info}. Dependencies installed: {libs}. Port: {port}."
             prompt_lines.append(prompt_line)
 
         # 模板字符串    
@@ -395,10 +410,7 @@ class ChatService:
         json_schema = ArtifactsSchema.model_json_schema()
 
         # 构建最终的系统提示词，替换两个占位符
-        return system_prompt.format(
-            templates_list=templates_str,
-            json_schema=json.dumps(json_schema, indent=2, ensure_ascii=False)
-        )
+        return system_prompt % templates_str
 
     async def normal_chat(self, chat_dto: ChatDTO) -> str:
         """
