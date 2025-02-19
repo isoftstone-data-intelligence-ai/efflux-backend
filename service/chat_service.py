@@ -160,15 +160,9 @@ class ChatService:
         if chat_dto.prompt:
             messages.append(("system", chat_dto.prompt))
 
-        # 使用user_id和chat_id组合创建唯一键
-        combined_id = f"{chat_dto.user_id}_{chat_dto.chat_id}"
-        # 添加最近 3 条用户历史记录
-        if combined_id in self.user_history_dict:
-            for record in self.user_history_dict[combined_id][-3:]:
-                # 每条历史记录都包含用户的问题和 AI 的回答
-                # 按照时间顺序添加到消息列表中
-                messages.append(("user", record["user"]))  # 用户的历史问题
-                messages.append(("assistant", record["assistant"]))  # AI 的历史回答
+        # 获取历史记录
+        history_messages = await self._load_chat_history(chat_dto.user_id, chat_dto.chat_id)
+        messages.extend(history_messages)
 
         # 将当前用户的新问题添加到消息列表的最后
         messages.append(("user", chat_dto.query))
@@ -219,15 +213,9 @@ class ChatService:
         }"""
         messages.append(("system", prompt))
 
-        # 使用user_id和chat_id组合创建唯一键
-        combined_id = f"{chat_dto.user_id}_{chat_dto.chat_id}"
-        # 添加最近 3 条用户历史记录
-        if combined_id in self.user_history_dict:
-            for record in self.user_history_dict[combined_id][-3:]:
-                # 每条历史记录都包含用户的问题和 AI 的回答
-                # 按照时间顺序添加到消息列表中
-                messages.append(("user", record["user"]))  # 用户的历史问题
-                messages.append(("assistant", record["assistant"]))  # AI 的历史回答
+        # 获取历史记录
+        history_messages = await self._load_chat_history(chat_dto.user_id, chat_dto.chat_id)
+        messages.extend(history_messages)
 
         # 将当前用户的新问题添加到消息列表的最后
         messages.append(("user", chat_dto.query))
@@ -260,16 +248,41 @@ class ChatService:
 
         # 构建新会话 content
         content_user = ContentDTO(type="text", text=query)
-        content_assistant = ContentDTO(type="text", text=reply)
+        
+        # 判断 reply 是否为 CodeInterpreterObject 格式
+        try:
+            code_interpreter_obj = json.loads(reply)
+            if all(key in code_interpreter_obj for key in ["commentary", "template", "code"]):
+                # 创建文本类型的 ContentDTO（使用 commentary）
+                content_commentary = ContentDTO(type="text", text=code_interpreter_obj["commentary"])
+                # 创建代码类型的 ContentDTO（使用 code）
+                content_code = ContentDTO(type="code", text=code_interpreter_obj["code"])
+                # 创建 CodeInterpreterObjectDTO 对象
+                object_dto = CodeInterpreterObjectDTO(**code_interpreter_obj)
+                
+                chat_message_assistant = ChatMessageDTO(
+                    role="assistant",
+                    content=[content_commentary, content_code],
+                    object=object_dto
+                )
+            else:
+                # 如果不是完整的 CodeInterpreterObject 格式，使用默认文本格式
+                content_assistant = ContentDTO(type="text", text=reply)
+                chat_message_assistant = ChatMessageDTO(
+                    role="assistant",
+                    content=[content_assistant]
+                )
+        except json.JSONDecodeError:
+            # 如果不是 JSON 格式，使用默认文本格式
+            content_assistant = ContentDTO(type="text", text=reply)
+            chat_message_assistant = ChatMessageDTO(
+                role="assistant",
+                content=[content_assistant]
+            )
 
-        # 创建消息，注意 content 需要是列表
         chat_message_user = ChatMessageDTO(
             role="user",
             content=[content_user]
-        )
-        chat_message_assistant = ChatMessageDTO(
-            role="assistant",
-            content=[content_assistant]
         )
 
         # 构建新的内容列表并转换为可序列化的字典
@@ -327,15 +340,9 @@ class ChatService:
         #         # 方案一：直接将历史记录构建为inputs字典，追加最后一次用户的query
         #         messages.append(chat_window.content)
 
-        # 使用user_id和chat_id组合创建唯一键
-        combined_id = f"{chat_dto.user_id}_{chat_dto.chat_id}"
-        # 添加最近 3 条用户历史记录
-        if combined_id in self.user_history_dict:
-            for record in self.user_history_dict[combined_id][-3:]:
-                # 每条历史记录都包含用户的问题和 AI 的回答
-                # 按照时间顺序添加到消息列表中
-                messages.append(("user", record["user"]))  # 用户的历史问题
-                messages.append(("assistant", record["assistant"]))  # AI 的历史回答
+        # 获取历史记录
+        history_messages = await self._load_chat_history(chat_dto.user_id, chat_dto.chat_id)
+        messages.extend(history_messages)
 
         # 此次对话query
         query = chat_dto.query
@@ -356,7 +363,7 @@ class ChatService:
                 Generate an fragment.
                 You can install additional dependencies.
                 Do not touch project dependencies files like package.json, package-lock.json, requirements.txt, etc.
-                You can use one of the following templates:{templates_list}.
+                You can use one of the following templates:%s.
                 And please provide your response in JSON format without any additional explanations or comments.
                 The response must follow this schema structure, with the code placed in the code field.
                 schema:{
@@ -417,3 +424,26 @@ class ChatService:
             base_url=user_llm_config.base_url,
             model=user_llm_config.model
         )
+
+    async def _load_chat_history(self, user_id: int, chat_id: int) -> List[tuple]:
+        """
+        加载用户的聊天历史记录
+
+        Args:
+            user_id (int): 用户ID
+            chat_id (int): 聊天会话ID
+
+        Returns:
+            List[tuple]: 历史消息列表，每个元素为 (role, content) 的元组
+        """
+        messages = []
+        # 使用user_id和chat_id组合创建唯一键
+        combined_id = f"{user_id}_{chat_id}"
+
+        # 添加最近 3 条用户历史记录
+        if combined_id in self.user_history_dict:
+            for record in self.user_history_dict[combined_id][-3:]:
+                messages.append(("user", record["user"]))
+                messages.append(("assistant", record["assistant"]))
+
+        return messages

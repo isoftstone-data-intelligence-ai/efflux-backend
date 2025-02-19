@@ -15,15 +15,30 @@ class ContentDTO(BaseModel):
             "image": self.image
         }
 
+# 代码解释器对象
+class CodeInterpreterObjectDTO(BaseModel):
+    commentary: str
+    template: str
+    title: str
+    description: str
+    additional_dependencies: List[str] = []
+    has_additional_dependencies: bool = False
+    install_dependencies_command: str = ""
+    port: Optional[int] = None
+    file_path: str
+    code: str
+
 # 对话信息记录
 class ChatMessageDTO(BaseModel):
     role: str # user | assistant
     content: List[ContentDTO]
-    
+    object: Optional[CodeInterpreterObjectDTO] = None
+
     def model_dump(self, **kwargs):
         return {
             "role": self.role,
-            "content": [c.model_dump() for c in self.content]
+            "content": [c.model_dump() for c in self.content],
+            "object": self.object.model_dump() if self.object else None
         }
 
 # 会话DTO
