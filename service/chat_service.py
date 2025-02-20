@@ -1,4 +1,4 @@
-from core.llm.llm_manager import LLMChat, LLMManager
+from core.llm.llm_manager import LLMManager
 from typing import AsyncGenerator, List, Optional
 from core.mcp.convert_mcp_tools import convert_mcp_to_langchain_tools
 from dao.artifacts_template_dao import ArtifactsTemplateDAO
@@ -129,10 +129,10 @@ class ChatService:
         # chat / artifacts 分流
         if chat_dto.code:
             # 走 artifacts 流程
-            inputs = await self.build_artifacts_inputs(chat_dto)
+            inputs = await self._build_artifacts_inputs(chat_dto)
         else:
             # 标准流式 chat 流程
-            inputs = await self.load_inputs(chat_dto)
+            inputs = await self._load_inputs(chat_dto)
 
         async for chunk in llm_chat.stream_chat(inputs=inputs, tools=tools, callback=data_callback,
                                                 api_key=user_llm_config.api_key,
@@ -141,7 +141,7 @@ class ChatService:
                                                 code=chat_dto.code):
             yield json.dumps(chunk.model_dump()) + "\n"
 
-    async def load_inputs(self, chat_dto: ChatDTO) -> dict:
+    async def _load_inputs(self, chat_dto: ChatDTO) -> dict:
         """
         加载模型输入内容
 
@@ -176,60 +176,23 @@ class ChatService:
         # 这个格式是 LLM API 所需的标准格式
         return {"messages": messages}
 
-    async def load_artifacts_inputs(self, chat_dto: ChatDTO) -> dict:
+    async def create_chat_window(self, user_id: int, query: str, chat_messages: Optional[List[str]] = None) -> int:
         """
-        加载模型输入内容
+        创建新的会话窗口
 
-        根据用户请求，拼接提示词、历史记录和当前问题，构造模型的输入。
+        根据用户ID和查询内容创建新的会话窗口，并生成会话概要。
 
         Args:
-            chat_dto (ChatDTO): 会话请求数据传输对象。
+            user_id (int): 用户ID
+            query (str): 用户的查询内容
+            chat_messages (Optional[List[str]], optional): 初始的会话消息列表。默认为 None。
 
         Returns:
-            dict: 拼装好的模型输入，包含消息列表。
+            int: 新创建的会话窗口ID
+
+        Note:
+            目前会话概要仅使用查询内容的前10个字符，后续可能会改进为使用 LLM 生成更有意义的概要。
         """
-        # 初始化一个空的消息列表，用于存储所有要发送给模型的消息
-        messages = []
-        # 检查是否有系统提示词（prompt）
-        # 如果有，将其作为 system 角色的消息添加到列表中
-        prompt = """{
-            "You are a skilled software engineer.\nYou do not make mistakes.\nGenerate an fragment.\nYou can install additional dependencies.\nDo not touch project dependencies files like package.json, package-lock.json, requirements.txt, etc.\nYou can use one of the following templates:\n1. code-interpreter-v1: \"Runs code as a Jupyter notebook cell. Strong data analysis angle. Can use complex visualisation to explain results.\". File: script.py. Dependencies installed: python, jupyter, numpy, pandas, matplotlib, seaborn, plotly. Port: none.\n2. nextjs-developer: \"A Next.js 13+ app that reloads automatically. Using the pages router.\". File: pages/index.tsx. Dependencies installed: nextjs@14.2.5, typescript, @types/node, @types/react, @types/react-dom, postcss, tailwindcss, shadcn. Port: 3000.\n3. vue-developer: \"A Vue.js 3+ app that reloads automatically. Only when asked specifically for a Vue app.\". File: app.vue. Dependencies installed: vue@latest, nuxt@3.13.0, tailwindcss. Port: 3000.\n4. streamlit-developer: \"A streamlit app that reloads automatically.\". File: app.py. Dependencies installed: streamlit, pandas, numpy, matplotlib, request, seaborn, plotly. Port: 8501.\n5. gradio-developer: \"A gradio app. Gradio Blocks/Interface should be called demo.\". File: app.py. Dependencies installed: gradio, pandas, numpy, matplotlib, request, seaborn, plotly. Port: 7860.",
-            
-        }
-
-        就像网络接口的数据格式json字符串,去掉你的提示语，以及json数据结构外的内容 如下，代码部分放在code字段，其余字段看能否回填
-
-        {
-            "commentary": "I will generate a simple 'Hello World' application using the Next.js template. This will include a basic page that displays 'Hello World' when accessed.",
-            "template": "nextjs-developer",
-            "title": "Hello World",
-            "description": "A simple Next.js app that displays 'Hello World'.",
-            "additional_dependencies": [],
-            "has_additional_dependencies": false,
-            "install_dependencies_command": "",
-            "port": 3000,
-            "file_path": "pages/index.tsx",
-            "code": ""
-        }"""
-        messages.append(("system", prompt))
-
-        # 获取历史记录
-        history_messages = await self._load_chat_history(chat_dto.user_id, chat_dto.chat_id)
-        messages.extend(history_messages)
-
-        # 将当前用户的新问题添加到消息列表的最后
-        messages.append(("user", chat_dto.query))
-
-        # 调试用：打印所有将要发送给模型的消息
-        print(">>> 模型输入 messages：")
-        for role, content in messages:
-            print(f"{role}: {content}")
-
-        # 返回一个包含所有消息的字典
-        # 这个格式是 LLM API 所需的标准格式
-        return {"messages": messages}
-
-    async def create_chat_window(self, user_id: int, query: str, chat_messages: Optional[List[str]] = None) -> int:
         # 会话概要
         # summary_prompt = "根据会话记录总结出本次会话的概要"
         # summary_query = query + reply
@@ -240,9 +203,35 @@ class ChatService:
         return new_chat_window.id
 
     async def get_chat_by_id(self, chat_window_id: int) -> ChatWindow:
+        """
+        根据ID获取会话窗口
+
+        获取指定ID的会话窗口及其完整的会话历史记录。
+
+        Args:
+            chat_window_id (int): 会话窗口ID
+
+        Returns:
+            ChatWindow: 包含完整会话历史的会话窗口对象
+        """
         return await self.chat_window_dao.get_chat_window_by_id(chat_window_id)
 
     async def update_chat_window(self, chat_window_id: int, query: str, reply: Optional[str] = None):
+        """
+        更新会话窗口内容
+
+        增量更新会话窗口的内容，添加新的用户查询和AI回复到会话历史中。
+        支持处理普通文本回复和代码解释器格式的回复。
+
+        Args:
+            chat_window_id (int): 会话窗口ID
+            query (str): 用户的查询内容
+            reply (Optional[str], optional): AI的回复内容。默认为 None。
+
+        Note:
+            当 reply 是 JSON 格式且包含特定字段时，会被解析为代码解释器对象，
+            并生成包含注释和代码的结构化内容。
+        """
         # 旧会话
         old_chat_window: ChatWindow = await self.chat_window_dao.get_chat_window_by_id(chat_window_id)
 
@@ -257,7 +246,7 @@ class ChatService:
                 json_str = json_str[8:]  # 移除 ```json\n
             if json_str.endswith("\n```"):
                 json_str = json_str[:-4]  # 移除 \n```
-            
+
             code_interpreter_obj = json.loads(json_str)
             if all(key in code_interpreter_obj for key in ["commentary", "template", "code"]):
                 # 创建文本类型的 ContentDTO（使用 commentary）
@@ -313,7 +302,7 @@ class ChatService:
             content=update_content
         )
 
-    async def build_artifacts_inputs(self, chat_dto: ChatDTO) -> dict:
+    async def _build_artifacts_inputs(self, chat_dto: ChatDTO) -> dict:
         """
         字典结构
         inputs:
@@ -337,18 +326,10 @@ class ChatService:
             # artifacts_template_id为0表示AUTO模式，从DB获取全部模板
             artifacts_templates = await self.artifacts_template_dao.get_all_artifact_templates()
         # 提示词
-        system_prompt = self.templates_to_prompt(artifacts_templates)
+        system_prompt = self._templates_to_prompt(artifacts_templates)
 
         messages = []
-
         messages.append(("system", system_prompt))
-
-        # 根据chat_id查询历史记录
-        # if chat_dto.chat_id:
-        #     chat_window = await self.chat_window_dao.get_chat_window_by_id(chat_dto.chat_window_id)
-        #     if chat_window.content:
-        #         # 方案一：直接将历史记录构建为inputs字典，追加最后一次用户的query
-        #         messages.append(chat_window.content)
 
         # 获取历史记录
         history_messages = await self._load_chat_history(chat_dto.user_id, chat_dto.chat_id)
@@ -358,24 +339,18 @@ class ChatService:
         query = chat_dto.query
         # 拼接最后一次query
         messages.append(("user", query))
-        # 方案二：将历史记录拼接到system prompt ,并固定提示词 ex: 参考下面的对话历史记录，完成query的内容
 
         # 调试用：打印所有将要发送给模型的消息
-        print(">>> system_prompt：")
-        print(system_prompt)
-        print(">>> 模型输入 messages：")
-        for role, content in messages:
-            print(f"{role}: {content}")
-
-        # return {
-        #     "system": system_prompt,
-        #     "messages": messages
-        # }
+        # print(">>> system_prompt：")
+        # print(system_prompt)
+        # print(">>> 模型输入 messages：")
+        # for role, content in messages:
+        #     print(f"{role}: {content}")
 
         return {"messages": messages}
 
     @staticmethod
-    def templates_to_prompt(templates: List[ArtifactsTemplate]) -> str:
+    def _templates_to_prompt(templates: List[ArtifactsTemplate]) -> str:
         # 系统提示词
         system_prompt = """{
                 You are a skilled software engineer.
@@ -400,8 +375,7 @@ class ChatService:
                     "port": 3000,
                     "file_path": "pages/index.tsx",
                     "code": ""
-                }
-"""
+                }"""
         prompt_lines = []
         for index, template in enumerate(templates, 1):
             file_info = template.file or 'none'
