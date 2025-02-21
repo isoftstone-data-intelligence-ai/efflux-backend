@@ -12,14 +12,14 @@ docker login --username=yourusername --password=yourpassword registry.cn-hangzho
 # 构建 Docker 镜像
 echo "Building Docker image..."
 docker build -t $imageName .
-
+echo "Building Docker image success..."
 # 推送镜像
 echo "Pushing Docker image to Alibaba Cloud Container Registry..."
 docker push $imageName
 
 # 通过 SSH 在远程服务器上拉取并运行镜像
 echo "Deploying to remote server..."
-ssh -i ${privateKeyPath} ${remoteHost} << 'EOF'
+ssh -i ${privateKeyPath} ${remoteHost} << EOF
 docker pull $imageName
 docker ps -q --filter ancestor=$imageName | xargs -r docker stop
 docker ps -a -q --filter ancestor=$imageName | xargs -r docker rm
