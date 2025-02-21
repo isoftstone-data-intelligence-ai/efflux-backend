@@ -3,11 +3,11 @@
 # 配置
 privateKeyPath="~/Documents/AI-key.pem"
 remoteHost="root@47.236.204.213"
-imageName="registry.cn-zhangjiakou.aliyuncs.com/other1/efflux-backend:1.0.0"
+imageName="registry.cn-zhangjiakou.aliyuncs.com/other1/efflux-backend:1.0.3"
 
 # 登录阿里云容器镜像服务
 #echo "Logging into Alibaba Cloud Container Registry..."
-#docker login --username=<your-aliyun-id> registry.cn-hangzhou.aliyuncs.com
+docker login --username=yourusername --password=yourpassword registry.cn-hangzhou.aliyuncs.com
 
 # 构建 Docker 镜像
 echo "Building Docker image..."
@@ -21,8 +21,9 @@ docker push $imageName
 echo "Deploying to remote server..."
 ssh -i ${privateKeyPath} ${remoteHost} << 'EOF'
 docker pull $imageName
-docker stop $(docker ps -q --filter ancestor=$imageName) || true && docker rm $(docker ps -a -q --filter ancestor=$imageName) || true
-docker run -d -p 8001:8001 $imageName
+docker ps -q --filter ancestor=$imageName | xargs -r docker stop
+docker ps -a -q --filter ancestor=$imageName | xargs -r docker rm
+docker run -d --restart unless-stopped -p 8000:8000 ${imageName}
 EOF
 
 echo "Deployment completed."
