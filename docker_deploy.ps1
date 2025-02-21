@@ -22,5 +22,6 @@ ssh -i ${privateKeyPath} ${remoteHost} "docker pull ${imageName}"
 # 停止并删除正在运行的容器（如果存在）
 ssh -i ${privateKeyPath} ${remoteHost} "docker ps -q --filter ancestor=$imageName | xargs -r docker stop"
 ssh -i ${privateKeyPath} ${remoteHost} "docker ps -a -q --filter ancestor=$imageName | xargs -r docker rm"
-ssh -i ${privateKeyPath} ${remoteHost} "docker run -d --restart unless-stopped -p 8000:8000 ${imageName}"
+# 正确启动容器
+ssh -i ${privateKeyPath} ${remoteHost} "docker run -d --name efflux-backend --restart unless-stopped -p 8000:8000 $imageName"
 Write-Output "Deployment completed."
