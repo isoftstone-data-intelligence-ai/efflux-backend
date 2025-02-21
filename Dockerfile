@@ -4,6 +4,10 @@ FROM python:3.12
 WORKDIR /app
 # 将当前目录内容复制到容器内的 WORKDIR
 COPY . .
+# 安装 pip 和 uv
+RUN python3 -m ensurepip --upgrade
+RUN pip install --no-cache-dir uv
+
 # 创建虚拟环境（如果需要）
 RUN python3 -m venv .venv
 # 激活虚拟环境并安装依赖
