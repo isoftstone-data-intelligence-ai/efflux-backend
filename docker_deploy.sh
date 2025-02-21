@@ -23,7 +23,7 @@ ssh -i ${privateKeyPath} ${remoteHost} << 'EOF'
 docker pull $imageName
 docker ps -q --filter ancestor=$imageName | xargs -r docker stop
 docker ps -a -q --filter ancestor=$imageName | xargs -r docker rm
-docker run -d --restart unless-stopped -p 8000:8000 ${imageName}
+docker run -d --name efflux-backend --restart unless-stopped -p 8000:8000 ${imageName}
 EOF
 
 echo "Deployment completed."
