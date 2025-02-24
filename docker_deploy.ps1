@@ -2,6 +2,7 @@
 $privateKeyPath = "C:\Users\ASUS\Downloads\AI-key.pem"
 $remoteHost = "root@47.236.204.213"
 $imageName = "registry.cn-zhangjiakou.aliyuncs.com/other1/efflux-backend:1.0.3"
+containerName="efflux-backend"
 
 # 构建 Docker 镜像
 Write-Output "Building Docker image..."
@@ -20,8 +21,8 @@ Write-Output "Deploying to remote server..."
 
 ssh -i ${privateKeyPath} ${remoteHost} "docker pull ${imageName}"
 # 停止并删除正在运行的容器（如果存在）
-ssh -i ${privateKeyPath} ${remoteHost} "docker ps -q --filter ancestor=$imageName | xargs -r docker stop"
-ssh -i ${privateKeyPath} ${remoteHost} "docker ps -a -q --filter ancestor=$imageName | xargs -r docker rm"
+ssh -i ${privateKeyPath} ${remoteHost} "docker stop $containerName || true"
+ssh -i ${privateKeyPath} ${remoteHost} "docker rm $containerName || true"
 # 正确启动容器
-ssh -i ${privateKeyPath} ${remoteHost} "docker run -d --name efflux-backend --restart unless-stopped -p 8000:8000 $imageName"
+ssh -i ${privateKeyPath} ${remoteHost} "docker run -d --name $containerName --restart unless-stopped -p 8000:8000 $imageName"
 Write-Output "Deployment completed."
