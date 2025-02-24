@@ -79,6 +79,6 @@ class Container(containers.DeclarativeContainer):
     # 注册 MCP App DAO
     mcp_app_dao = providers.Singleton(MCPAppDAO, session_factory=database_provider.provided.session_factory)
     # 注册 MCP App Service
-    mcp_app_service = providers.Singleton(MCPAppService, mcp_app_dao=mcp_app_dao)
+    mcp_app_service = providers.Singleton(MCPAppService, mcp_app_dao=mcp_app_dao, mcp_config_service=mcp_config_service)
 
 

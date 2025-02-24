@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from core.common.container import Container
+from core.security.middleware import request_token_context
 from dto.global_response import GlobalResponse
 from service.mcp_app_service import MCPAppService
 from utils import result_utils
@@ -25,3 +26,13 @@ async def get_app(
 ) -> GlobalResponse:
     app = await mcp_app_service.get_app(app_id)
     return result_utils.build_response(app)
+
+@router.post("/import/{app_id}", summary="为当前用户一键添加MCP配置")
+async def import_server(
+    app_id: int,
+    mcp_app_service: MCPAppService = Depends(get_mcp_app_service)
+) -> GlobalResponse:
+    # token中获取user_id
+    user_id = request_token_context.get().get("id")
+    new_server = await mcp_app_service.import_server(app_id, user_id)
+    return result_utils.build_response(new_server)
