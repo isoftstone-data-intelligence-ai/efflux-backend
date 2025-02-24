@@ -72,3 +72,33 @@ def build_validation_error_response(sub_code: int, errors: list) -> GlobalRespon
         data=errors,
         json_encoder=DateTimeEncoder
     )
+
+def build_page_response(data: list, page: int, page_size: int, total: int) -> GlobalResponse:
+    """构建分页响应
+    
+    Args:
+        data: 分页数据列表
+        page: 当前页码
+        page_size: 每页数量
+        total: 总记录数
+        
+    Returns:
+        GlobalResponse: 统一的分页响应格式
+    """
+    # 如果是 Pydantic 模型列表，转换为字典列表
+    if data and isinstance(data[0], BaseModel):
+        data = [item.model_dump() if isinstance(item, BaseModel) else item for item in data]
+    
+    return GlobalResponse(
+        code=200,
+        sub_code=200,
+        sub_message="success",
+        data={
+            "records": data,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "pages": (total + page_size - 1) // page_size  # 计算总页数
+        },
+        json_encoder=DateTimeEncoder
+    )

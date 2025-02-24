@@ -16,7 +16,7 @@ async def get_app_page(
     page_size: int = Query(10, description="每页数量"),
     mcp_app_service: MCPAppService = Depends(get_mcp_app_service)
 ) -> GlobalResponse:
-    apps, total = await mcp_app_service.get_app_list(page, page_size)
+    apps, total = await mcp_app_service.get_app_page(page, page_size)
     return result_utils.build_page_response(apps, page, page_size, total)
 
 @router.get("/{app_id}", summary="mcp应用详情")

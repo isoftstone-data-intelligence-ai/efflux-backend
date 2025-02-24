@@ -3,6 +3,7 @@ from sqlalchemy import update, delete
 from model.mcp_app import MCPApp
 from typing import Optional, List, Dict, Any
 from datetime import datetime
+from sqlalchemy import func
 
 
 class MCPAppDAO:
@@ -101,3 +102,25 @@ class MCPAppDAO:
             )
             await session.commit()
             return result.rowcount > 0
+
+    async def get_app_page(self, page: int = 1, page_size: int = 10) -> Tuple[List[MCPApp], int]:
+        """获取应用分页列表
+        
+        Args:
+            page: 页码，从1开始
+            page_size: 每页数量
+            
+        Returns:
+            Tuple[List[MCPApp], int]: 返回分页数据和总记录数
+        """
+        async with self._session_factory() as session:
+            # 查询总记录数
+            count_query = select(func.count()).select_from(MCPApp)
+            total = await session.scalar(count_query)
+            
+            # 查询分页数据
+            offset = (page - 1) * page_size
+            query = select(MCPApp).offset(offset).limit(page_size)
+            result = await session.execute(query)
+            
+            return result.scalars().all(), total
