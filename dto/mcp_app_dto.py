@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import List, Dict, Optional
+from datetime import datetime
 
 class MCPAppDTO(BaseModel):
     """用于返回数据和更新操作的 DTO"""
@@ -7,6 +8,7 @@ class MCPAppDTO(BaseModel):
     name: str
     description: str
     icon_url: str
+    requires_configuration: bool = False
     
     # GitHub 仓库信息
     github_repo_id: int
@@ -33,6 +35,7 @@ class CreateMCPAppDTO(BaseModel):
     name: str
     description: str
     icon_url: str
+    requires_configuration: bool
     
     # GitHub 仓库信息
     github_repo_id: int

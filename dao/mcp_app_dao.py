@@ -25,10 +25,20 @@ class MCPAppDAO:
             return result.scalar_one_or_none()
 
     async def create_app(self,
-                        app_name: str,
+                        name: str,
                         description: str,
-                        source_link: str,
                         icon_url: str,
+                        requires_configuration: bool,
+                        # GitHub 仓库信息
+                        github_repo_id: int,
+                        github_repo_name: str,
+                        github_repo_full_name: str,
+                        github_html_url: str,
+                        github_url: str,
+                        github_created_at: datetime,
+                        github_updated_at: datetime,
+                        github_pushed_at: datetime,
+                        # MCP 服务器配置
                         server_name: str,
                         command: str,
                         args: List[str],
@@ -36,10 +46,18 @@ class MCPAppDAO:
         """创建新的 MCP 应用"""
         async with self._session_factory() as session:
             new_app = MCPApp(
-                app_name=app_name,
+                name=name,
                 description=description,
-                source_link=source_link,
                 icon_url=icon_url,
+                requires_configuration=requires_configuration,
+                github_repo_id=github_repo_id,
+                github_repo_name=github_repo_name,
+                github_repo_full_name=github_repo_full_name,
+                github_html_url=github_html_url,
+                github_url=github_url,
+                github_created_at=github_created_at,
+                github_updated_at=github_updated_at,
+                github_pushed_at=github_pushed_at,
                 server_name=server_name,
                 command=command,
                 args=args,
@@ -53,19 +71,20 @@ class MCPAppDAO:
 
     async def update_app(self,
                         id: int,
-                        app_name: Optional[str] = None,
+                        name: Optional[str] = None,
                         description: Optional[str] = None,
                         source_link: Optional[str] = None,
                         icon_url: Optional[str] = None,
                         server_name: Optional[str] = None,
                         command: Optional[str] = None,
                         args: Optional[List[str]] = None,
-                        env: Optional[Dict[str, Any]] = None) -> Optional[MCPApp]:
+                        env: Optional[Dict[str, Any]] = None,
+                        requires_configuration: Optional[bool] = None) -> Optional[MCPApp]:
         """更新 MCP 应用信息"""
         async with self._session_factory() as session:
             update_data = {}
-            if app_name is not None:
-                update_data['app_name'] = app_name
+            if name is not None:
+                update_data['name'] = name
             if description is not None:
                 update_data['description'] = description
             if source_link is not None:
@@ -80,6 +99,8 @@ class MCPAppDAO:
                 update_data['args'] = args
             if env is not None:
                 update_data['env'] = env
+            if requires_configuration is not None:
+                update_data['requires_configuration'] = requires_configuration
 
             if update_data:
                 update_data['updated_at'] = datetime.now()

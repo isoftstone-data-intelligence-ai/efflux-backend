@@ -19,14 +19,24 @@ class MCPAppService:
             return None
         return MCPAppDTO(
             id=app.id,
-            app_name=app.app_name,
+            name=app.name,
             description=app.description,
-            source_link=app.source_link,
             icon_url=app.icon_url,
+            requires_configuration=app.requires_configuration,
+            github_repo_id=app.github_repo_id,
+            github_repo_name=app.github_repo_name,
+            github_repo_full_name=app.github_repo_full_name,
+            github_html_url=app.github_html_url,
+            github_url=app.github_url,
+            github_created_at=app.github_created_at,
+            github_updated_at=app.github_updated_at,
+            github_pushed_at=app.github_pushed_at,
             server_name=app.server_name,
             command=app.command,
             args=app.args,
-            env=app.env
+            env=app.env,
+            created_at=app.created_at,
+            updated_at=app.updated_at
         )
 
     async def get_app_list(self, page: int = 1, page_size: int = 10) -> Tuple[List[MCPAppDTO], int]:
