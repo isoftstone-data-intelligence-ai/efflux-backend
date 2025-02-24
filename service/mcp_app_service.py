@@ -22,7 +22,6 @@ class MCPAppService:
             name=app.name,
             description=app.description,
             icon_url=app.icon_url,
-            requires_configuration=app.requires_configuration,
             github_repo_id=app.github_repo_id,
             github_repo_name=app.github_repo_name,
             github_repo_full_name=app.github_repo_full_name,
@@ -35,21 +34,16 @@ class MCPAppService:
             command=app.command,
             args=app.args,
             env=app.env,
+            
+            # 通用字段
             created_at=app.created_at,
             updated_at=app.updated_at
         )
 
-    async def get_app_list(self, page: int = 1, page_size: int = 10) -> Tuple[List[MCPAppDTO], int]:
+    async def get_app_page(self, page: int = 1, page_size: int = 10) -> Tuple[List[MCPAppDTO], int]:
         """获取应用列表，支持分页"""
-        apps = await self.mcp_app_dao.get_all_apps()
-        total = len(apps)
-        
-        # 计算分页
-        start = (page - 1) * page_size
-        end = start + page_size
-        paginated_apps = apps[start:end]
-        
-        return [self.to_dto(app) for app in paginated_apps], total
+        apps, total = await self.mcp_app_dao.get_app_page(page, page_size)
+        return [self.to_dto(app) for app in apps], total
 
     async def get_app(self, app_id: int) -> Optional[MCPAppDTO]:
         """获取单个应用"""
