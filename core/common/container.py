@@ -5,12 +5,14 @@ from core.llm.ollama import OllamaLlm
 from core.llm.open_ai import OpenAILlm
 from dao.llm_config_dao import LlmConfigDAO
 from dao.llm_template_dao import LlmTemplateDAO
+from dao.mcp_app_dao import MCPAppDAO
 from extensions.ext_database import DatabaseProvider
 from dao.user_dao import UserDAO
 from dao.chat_window_dao import ChatWindowDAO
 from dao.mcp_server_dao import MCPServerDAO
 from service.chat_service import ChatService
 from service.chat_window_service import ChatWindowService
+from service.mcp_app_service import MCPAppService
 from service.mcp_config_service import MCPConfigService
 from service.user_service import UserService
 from core.llm.azure_open_ai import AzureLlm
@@ -73,5 +75,10 @@ class Container(containers.DeclarativeContainer):
                                        llm_config_dao=llm_config_dao,
                                        artifacts_template_dao=artifacts_template_dao,
                                        llm_manager=llm_manager)
+
+    # 注册 MCP App DAO
+    mcp_app_dao = providers.Singleton(MCPAppDAO, session_factory=database_provider.provided.session_factory)
+    # 注册 MCP App Service
+    mcp_app_service = providers.Singleton(MCPAppService, mcp_app_dao=mcp_app_dao)
 
 

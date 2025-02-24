@@ -6,6 +6,7 @@ from controller import (
     user_controller,
     login_controller,
     mcp_controller,
+    mcp_app_controller,
     chat_window_controller,
     llm_controller,
     artifacts_controller
@@ -49,6 +50,7 @@ app.include_router(chat_controller.router)
 app.include_router(user_controller.router)
 app.include_router(login_controller.router)
 app.include_router(mcp_controller.router)
+app.include_router(mcp_app_controller.router)
 app.include_router(chat_window_controller.router)
 app.include_router(llm_controller.router)
 app.include_router(artifacts_controller.router)
