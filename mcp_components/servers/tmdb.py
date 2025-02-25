@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import os
 import httpx
 from typing import Dict, List, Optional, TypedDict, Union
@@ -119,25 +117,25 @@ async def read_resource(uri: str) -> Dict:
         }]
     }
 
-@mcp.tool()
-async def search_movies(query: str) -> str:
-    """搜索电影
-    
-    Args:
-        query: 搜索关键词
-    """
-    data = await fetch_from_tmdb("/search/movie", {"query": query})
-    
-    results = []
-    for movie in data["results"]:
-        year = movie["release_date"].split("-")[0] if movie["release_date"] else "N/A"
-        results.append(
-            f"{movie['title']} ({year}) - ID: {movie['id']}\n"
-            f"Rating: {movie['vote_average']}/10\n"
-            f"Overview: {movie['overview']}\n"
-        )
-    
-    return f"Found {len(data['results'])} movies:\n\n" + "\n---\n".join(results)
+# @mcp.tool()
+# async def search_movies(query: str) -> str:
+#     """搜索电影
+#
+#     Args:
+#         query: 搜索关键词
+#     """
+#     data = await fetch_from_tmdb("/search/movie", {"query": query})
+#
+#     results = []
+#     for movie in data["results"]:
+#         year = movie["release_date"].split("-")[0] if movie["release_date"] else "N/A"
+#         results.append(
+#             f"{movie['title']} ({year}) - ID: {movie['id']}\n"
+#             f"Rating: {movie['vote_average']}/10\n"
+#             f"Overview: {movie['overview']}\n"
+#         )
+#
+#     return f"Found {len(data['results'])} movies:\n\n" + "\n---\n".join(results)
 
 @mcp.tool()
 async def get_recommendations(movie_id: str) -> str:
