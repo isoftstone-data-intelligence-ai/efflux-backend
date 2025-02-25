@@ -48,8 +48,15 @@ class ChatWindowDAO:
     async def get_user_chat_windows(self, user_id) -> List[ChatWindow]:
         async with self._session_factory() as session:
             result = await session.execute(
-                select(ChatWindow).where(ChatWindow.user_id == user_id).order_by(ChatWindow.id.desc()))
-            return result.scalars().all()
+                select(
+                    ChatWindow.id,
+                    ChatWindow.user_id,
+                    ChatWindow.summary,
+                    ChatWindow.updated_at
+                ).where(ChatWindow.user_id == user_id)
+                .order_by(ChatWindow.id.desc())
+            )
+            return result.all()
 
     async def get_chat_window_by_id(self, chat_window_id: int) -> ChatWindow:
         async with self._session_factory() as session:
