@@ -35,6 +35,7 @@ from model.chat_window import ChatWindow
 from model.llm_config import LlmConfig
 from model.llm_template import LlmTemplate
 from model.artifacts_template import ArtifactsTemplate
+from model.mcp_app import MCPApp
 
 target_metadata = Base.metadata
 
