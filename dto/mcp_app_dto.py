@@ -25,7 +25,7 @@ class MCPAppDTO(BaseModel):
     # MCP 服务器配置
     server_name: str
     command: str
-    args: List[str] = Field(default_factory=list)
+    args: Optional[List[str]] = Field(default_factory=list)
     env: Optional[Dict[str, str]] = None
     
     # 通用字段
@@ -54,5 +54,5 @@ class CreateMCPAppDTO(BaseModel):
     # MCP 服务器配置
     server_name: str
     command: str
-    args: List[str] = Field(default_factory=list)
+    args: Optional[List[str]] = Field(default_factory=list)
     env: Optional[Dict[str, str]] = None
