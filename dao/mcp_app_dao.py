@@ -1,7 +1,7 @@
 from sqlalchemy.future import select
 from sqlalchemy import update, delete
 from model.mcp_app import MCPApp
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Tuple
 from datetime import datetime
 from sqlalchemy import func
 from core.common.pagination import Pagination
