@@ -45,25 +45,25 @@ class MCPApp(Base):
     id = Column(BigInteger, primary_key=True, autoincrement=True, index=True)
     name = Column(String(100), nullable=False)
     description = Column(String(1000), nullable=False)
-    icon_url = Column(String(100), nullable=False)
+    icon_url = Column(String(100))
     requires_configuration = Column(Boolean, nullable=False, default=False)
     desktop_app = Column(Boolean, nullable=False, default=False)
     
     # GitHub 仓库信息
-    github_repo_id = Column(BigInteger, nullable=False)
-    github_repo_name = Column(String(100), nullable=False)
-    github_repo_full_name = Column(String(100), nullable=False)
-    github_html_url = Column(String(100), nullable=False)
-    github_url = Column(String(100), nullable=False)
-    github_created_at = Column(TIMESTAMP, nullable=False)
-    github_updated_at = Column(TIMESTAMP, nullable=False)
-    github_pushed_at = Column(TIMESTAMP, nullable=False)
+    github_repo_id = Column(BigInteger)
+    github_repo_name = Column(String(100))
+    github_repo_full_name = Column(String(100))
+    github_html_url = Column(String(100))
+    github_url = Column(String(100))
+    github_created_at = Column(TIMESTAMP)
+    github_updated_at = Column(TIMESTAMP)
+    github_pushed_at = Column(TIMESTAMP)
 
     # MCP 服务器配置
-    server_name = Column(String(100), nullable=False)
-    command = Column(String(100), nullable=False)
-    args = Column(ARRAY(TEXT), nullable=False)
-    env = Column(JSON, nullable=True)
+    server_name = Column(String(100))
+    command = Column(String(100))
+    args = Column(ARRAY(TEXT))
+    env = Column(JSON)
 
     # 通用字段
     created_at = Column(TIMESTAMP(timezone=True), nullable=True, default=datetime.now)
