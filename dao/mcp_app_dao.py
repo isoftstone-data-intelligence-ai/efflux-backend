@@ -53,7 +53,7 @@ class MCPAppDAO:
                 description=description,
                 icon_url=icon_url,
                 requires_configuration=requires_configuration,
-                desktop_app=desktop_app,  # 新增字段
+                desktop_app=desktop_app,
                 github_repo_id=github_repo_id,
                 github_repo_name=github_repo_name,
                 github_repo_full_name=github_repo_full_name,

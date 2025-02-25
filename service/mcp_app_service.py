@@ -23,7 +23,7 @@ class MCPAppService:
             description=app.description,
             icon_url=app.icon_url,
             requires_configuration=app.requires_configuration,
-            desktop_app=app.desktop_app,  # 新增字段
+            desktop_app=app.desktop_app,
             github_repo_id=app.github_repo_id,
             github_repo_name=app.github_repo_name,
             github_repo_full_name=app.github_repo_full_name,
