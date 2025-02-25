@@ -13,7 +13,7 @@ import jwt
 
 from utils import result_utils
 
-router = APIRouter(prefix="/auth", tags=["Authentication"])
+router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 # 显示创建日志
 logger = get_logger(__name__)
 

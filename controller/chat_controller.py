@@ -5,7 +5,7 @@ from core.security.middleware import request_token_context
 from dto.chat_dto import ChatDTO
 from service.chat_service import ChatService
 
-router = APIRouter(prefix="/chat", tags=["Chat"])
+router = APIRouter(prefix="/api/chat", tags=["Chat"])
 
 
 # 从容器中获取注册在容器中的 ChatService 实例

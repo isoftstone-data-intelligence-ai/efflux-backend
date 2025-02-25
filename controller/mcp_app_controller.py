@@ -5,7 +5,7 @@ from dto.global_response import GlobalResponse
 from service.mcp_app_service import MCPAppService
 from utils import result_utils
 
-router = APIRouter(prefix="/mcp_app", tags=["MCPApp"])
+router = APIRouter(prefix="/api/mcp_app", tags=["MCPApp"])
 
 def get_mcp_app_service() -> MCPAppService:
     return Container.mcp_app_service()

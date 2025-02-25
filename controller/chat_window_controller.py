@@ -5,7 +5,7 @@ from dto.global_response import GlobalResponse
 from service.chat_window_service import ChatWindowService
 from utils import result_utils
 
-router = APIRouter(prefix="/chat_window", tags=["ChatWindow"])
+router = APIRouter(prefix="/api/chat_window", tags=["ChatWindow"])
 
 
 def get_chat_window_service():

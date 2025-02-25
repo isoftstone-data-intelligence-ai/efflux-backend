@@ -10,7 +10,7 @@ from model.user import User
 from core.security.middleware import request_token_context
 from utils import result_utils
 
-router = APIRouter(prefix="/user", tags=["Users"])
+router = APIRouter(prefix="/api/user", tags=["Users"])
 
 logger = get_logger(__name__)
 

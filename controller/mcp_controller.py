@@ -6,7 +6,7 @@ from dto.mcp_server_dto import MCPServerDTO, CreateMCPServerDTO
 from service.mcp_config_service import MCPConfigService
 from utils import result_utils
 
-router = APIRouter(prefix="/mcp", tags=["MCPServer"])
+router = APIRouter(prefix="/api/mcp", tags=["MCPServer"])
 
 
 def get_mcp_config_service() -> MCPConfigService:

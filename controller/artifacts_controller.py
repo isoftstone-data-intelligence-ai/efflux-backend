@@ -5,7 +5,7 @@ from dto.global_response import GlobalResponse
 from service.artifacts_template_service import ArtifactsService
 from utils import result_utils
 
-router = APIRouter(prefix="/artifacts", tags=["Artifacts"])
+router = APIRouter(prefix="/api/artifacts", tags=["Artifacts"])
 
 
 def get_artifacts_service() -> ArtifactsService:

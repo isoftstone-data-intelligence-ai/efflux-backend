@@ -7,7 +7,7 @@ from dto.llm_template_dto import LLMTemplateDTO
 from service.llm_service import LLMService
 from utils import result_utils
 
-router = APIRouter(prefix="/llm", tags=["LLM"])
+router = APIRouter(prefix="/api/llm", tags=["LLM"])
 
 
 def get_llm_service() -> LLMService:
