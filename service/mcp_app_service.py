@@ -32,6 +32,7 @@ class MCPAppService:
             github_created_at=app.github_created_at,
             github_updated_at=app.github_updated_at,
             github_pushed_at=app.github_pushed_at,
+            github_stars=app.github_stars,  # 新增字段
             server_name=app.server_name,
             command=app.command,
             args=app.args,

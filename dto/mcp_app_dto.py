@@ -20,6 +20,7 @@ class MCPAppDTO(BaseModel):
     github_created_at: Optional[datetime] = None
     github_updated_at: Optional[datetime] = None
     github_pushed_at: Optional[datetime] = None
+    github_stars: Optional[int] = None  # 新增字段：GitHub 仓库星数
     
     # MCP 服务器配置
     server_name: str
@@ -37,17 +38,18 @@ class CreateMCPAppDTO(BaseModel):
     description: str
     icon_url: str
     requires_configuration: bool
-    desktop_app: bool = False  # 新增字段：是否为桌面应用
+    desktop_app: bool = False
     
     # GitHub 仓库信息
-    github_repo_id: int
-    github_repo_name: str
-    github_repo_full_name: str
-    github_html_url: str
-    github_url: str
-    github_created_at: datetime
-    github_updated_at: datetime
-    github_pushed_at: datetime
+    github_repo_id: Optional[int] = None
+    github_repo_name: Optional[str] = None
+    github_repo_full_name: Optional[str] = None
+    github_html_url: Optional[str] = None
+    github_url: Optional[str] = None
+    github_created_at: Optional[datetime] = None
+    github_updated_at: Optional[datetime] = None
+    github_pushed_at: Optional[datetime] = None
+    github_stars: Optional[int] = None
     
     # MCP 服务器配置
     server_name: str

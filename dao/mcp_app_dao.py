@@ -41,6 +41,7 @@ class MCPAppDAO:
                         github_created_at: datetime,
                         github_updated_at: datetime,
                         github_pushed_at: datetime,
+                        github_stars: int,  # 新增参数
                         # MCP 服务器配置
                         server_name: str,
                         command: str,
@@ -62,6 +63,7 @@ class MCPAppDAO:
                 github_created_at=github_created_at,
                 github_updated_at=github_updated_at,
                 github_pushed_at=github_pushed_at,
+                github_stars=github_stars,  # 新增字段
                 server_name=server_name,
                 command=command,
                 args=args,

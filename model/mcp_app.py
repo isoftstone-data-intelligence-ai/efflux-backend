@@ -58,6 +58,7 @@ class MCPApp(Base):
     github_created_at = Column(TIMESTAMP)
     github_updated_at = Column(TIMESTAMP)
     github_pushed_at = Column(TIMESTAMP)
+    github_stars = Column(BigInteger)
 
     # MCP 服务器配置
     server_name = Column(String(100))
