@@ -17,6 +17,7 @@ class MCPApp(Base):
             description: 应用描述
             icon_url: 应用图标URL
             requires_configuration: 是否需要配置
+            desktop_app: 是否为桌面应用
             
         GitHub 仓库信息:
             github_repo_id: GitHub 仓库唯一标识
@@ -46,6 +47,7 @@ class MCPApp(Base):
     description = Column(String(1000), nullable=False)
     icon_url = Column(String(100), nullable=False)
     requires_configuration = Column(Boolean, nullable=False, default=False)
+    desktop_app = Column(Boolean, nullable=False, default=False)
     
     # GitHub 仓库信息
     github_repo_id = Column(BigInteger, nullable=False)

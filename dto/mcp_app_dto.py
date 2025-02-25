@@ -9,6 +9,7 @@ class MCPAppDTO(BaseModel):
     description: str
     icon_url: str
     requires_configuration: bool = False
+    desktop_app: bool = False  # 新增字段：是否为桌面应用
     
     # GitHub 仓库信息
     github_repo_id: int
@@ -36,6 +37,7 @@ class CreateMCPAppDTO(BaseModel):
     description: str
     icon_url: str
     requires_configuration: bool
+    desktop_app: bool = False  # 新增字段：是否为桌面应用
     
     # GitHub 仓库信息
     github_repo_id: int

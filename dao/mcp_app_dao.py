@@ -31,6 +31,7 @@ class MCPAppDAO:
                         description: str,
                         icon_url: str,
                         requires_configuration: bool,
+                        desktop_app: bool,  # 新增参数
                         # GitHub 仓库信息
                         github_repo_id: int,
                         github_repo_name: str,
@@ -52,6 +53,7 @@ class MCPAppDAO:
                 description=description,
                 icon_url=icon_url,
                 requires_configuration=requires_configuration,
+                desktop_app=desktop_app,  # 新增字段
                 github_repo_id=github_repo_id,
                 github_repo_name=github_repo_name,
                 github_repo_full_name=github_repo_full_name,
@@ -81,7 +83,8 @@ class MCPAppDAO:
                         command: Optional[str] = None,
                         args: Optional[List[str]] = None,
                         env: Optional[Dict[str, Any]] = None,
-                        requires_configuration: Optional[bool] = None) -> Optional[MCPApp]:
+                        requires_configuration: Optional[bool] = None,
+                        desktop_app: Optional[bool] = None) -> Optional[MCPApp]:  # 新增参数
         """更新 MCP 应用信息"""
         async with self._session_factory() as session:
             update_data = {}
@@ -103,6 +106,8 @@ class MCPAppDAO:
                 update_data['env'] = env
             if requires_configuration is not None:
                 update_data['requires_configuration'] = requires_configuration
+            if desktop_app is not None:
+                update_data['desktop_app'] = desktop_app  # 新增更新字段
 
             if update_data:
                 update_data['updated_at'] = datetime.now()
