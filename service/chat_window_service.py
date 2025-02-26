@@ -34,28 +34,34 @@ class ChatWindowService:
         # 获取该窗口的所有聊天消息
         messages = await self.chat_message_dao.get_messages_by_window_id(chat_window_id)
         
-        # 将消息转换为 DTO 格式
+        # 转换消息格式
         chat_messages = []
         for message in messages:
-            content_list = []
-            for content_item in message.content:
-                content_list.append(ContentDTO(
-                    type=content_item.get('type'),
-                    text=content_item.get('text'),
-                    image=content_item.get('image')
-                ))
+            # 转换 content 列表
+            content_dtos = []
+            if isinstance(message.content, list):
+                for content_item in message.content:
+                    if isinstance(content_item, dict):
+                        content_dto = ContentDTO(
+                            type=content_item["type"],
+                            text=content_item["text"] if "text" in content_item else None,
+                            image=content_item["image"] if "image" in content_item else None
+                        )
+                        content_dtos.append(content_dto)
             
-            # 如果存在代码解析器对象，则转换它
+            # 转换 code_object（如果存在）
             code_object = None
             if message.code_object:
                 code_object = CodeInterpreterObjectDTO(**message.code_object)
             
-            chat_messages.append(ChatMessageDTO(
+            # 创建 ChatMessageDTO
+            chat_message = ChatMessageDTO(
                 role=message.role,
-                content=content_list,
+                content=content_dtos,
                 object=code_object
-            ))
-        
+            )
+            chat_messages.append(chat_message)
+            
         # 创建并返回 ChatWindowDTO
         return ChatWindowDTO(
             id=chat_window.id,

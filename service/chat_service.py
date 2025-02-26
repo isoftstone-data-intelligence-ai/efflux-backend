@@ -269,7 +269,8 @@ class ChatService:
                 # 更新CodeInterpreterObjectDTO 对象
                 object_dto = CodeInterpreterObjectDTO(**code_interpreter_obj)
 
-                content_assistant.append([content_commentary.model_dump(), content_code.model_dump()])
+                content_assistant.append(content_commentary.model_dump())
+                content_assistant.append(content_code.model_dump())
             else:
                 # 如果不是完整的 CodeInterpreterObject 格式，使用默认文本格式
 
@@ -279,6 +280,8 @@ class ChatService:
             content_assistant.append(ContentDTO(type="text", text=reply).model_dump())
 
         # 新增会话信息记录-assistant
+        if object_dto is not None:
+            object_dto = object_dto.model_dump()
         await self.chat_message_dao.add_chat_message(chat_window_id, "assistant", content_assistant, object_dto)
 
         # 更新会话窗口

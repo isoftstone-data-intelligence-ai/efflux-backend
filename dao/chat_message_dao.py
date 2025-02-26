@@ -8,13 +8,7 @@ class ChatMessageDAO:
     def __init__(self, session_factory):
         self._session_factory = session_factory
 
-    async def add_chat_message(
-        self,
-        chat_window_id: int,
-        role: str,
-        content: list,
-        code_object: Optional[dict] = None
-    ):
+    async def add_chat_message(self,chat_window_id: int,role: str,content: list,code_object: Optional[dict] = None):
         async with self._session_factory() as session:
             new_chat_message = ChatMessage(
                 chat_window_id=chat_window_id,

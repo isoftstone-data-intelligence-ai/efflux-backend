@@ -28,6 +28,20 @@ class CodeInterpreterObjectDTO(BaseModel):
     file_path: str
     code: str
 
+    def model_dump(self, **kwargs):
+        return {
+            "commentary": self.commentary,
+            "template": self.template,
+            "title": self.title,
+            "description": self.description,
+            "additional_dependencies": self.additional_dependencies,
+            "has_additional_dependencies": self.has_additional_dependencies,
+            "install_dependencies_command": self.install_dependencies_command,
+            "port": self.port,
+            "file_path": self.file_path,
+            "code": self.code
+        }
+
 # 对话信息记录
 class ChatMessageDTO(BaseModel):
     role: str # user | assistant
