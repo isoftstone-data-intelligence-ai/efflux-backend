@@ -26,3 +26,13 @@ class ChatMessageDAO:
             session.add(new_chat_message)
             await session.commit()
             return new_chat_message
+
+    async def get_messages_by_window_id(self, chat_window_id: int):
+        async with self._session_factory() as session:
+            query = select(ChatMessage).where(
+                ChatMessage.chat_window_id == chat_window_id
+            ).order_by(ChatMessage.created_at.desc())
+            
+            result = await session.execute(query)
+            messages = result.scalars().all()
+            return messages
