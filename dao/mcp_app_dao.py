@@ -135,9 +135,10 @@ class MCPAppDAO:
     async def get_app_page(self, page: int = 1, page_size: int = 10) -> Tuple[List[MCPApp], int]:
         """获取应用分页列表"""
         async with self._session_factory() as session:
+            query = select(MCPApp).order_by(MCPApp.desktop_app.asc(), MCPApp.id.asc())
             return await Pagination.paginate(
                 session=session,
-                query=select(MCPApp).order_by(MCPApp.id),
+                query=query,
                 page=page,
                 page_size=page_size
             )
