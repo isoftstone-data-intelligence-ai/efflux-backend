@@ -133,6 +133,12 @@ class ChatService:
         if chat_dto.code:
             # 走 artifacts 流程
             inputs = await self._build_artifacts_inputs(chat_dto)
+            # Todo: 目前 tools 和 artifacts 一起用容易报错，暂时只开放单选。
+            #       报错有两个原因：
+            #           1. 如果是 deepseek r1/v3，目前并不支持 Function Calling
+            #           2. 如果是国内其他模型例如阿里 Qwen，虽然已经号称兼容 Function Calling，但在实际调用过程中经常出问题，跟模型本身能力有关
+            #       所以不要把下面这行 tools = [] 删掉。
+            tools = []
         else:
             # 标准流式 chat 流程
             inputs = await self._load_inputs(chat_dto)
