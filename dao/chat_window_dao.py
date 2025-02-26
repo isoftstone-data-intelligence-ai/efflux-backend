@@ -52,6 +52,7 @@ class ChatWindowDAO:
                     ChatWindow.id,
                     ChatWindow.user_id,
                     ChatWindow.summary,
+                    ChatWindow.created_at,
                     ChatWindow.updated_at
                 ).where(ChatWindow.user_id == user_id)
                 .order_by(ChatWindow.id.desc())

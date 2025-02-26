@@ -12,7 +12,7 @@ class ChatMessageDAO:
         self,
         chat_window_id: int,
         role: str,
-        content: dict,
+        content: list,
         code_object: Optional[dict] = None
     ):
         async with self._session_factory() as session:

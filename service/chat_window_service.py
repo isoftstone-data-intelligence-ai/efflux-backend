@@ -72,14 +72,10 @@ class ChatWindowService:
 
     @staticmethod
     def convert_model_to_chat_window_dto(chat_window: ChatWindow) -> ChatWindowDTO:
-        # 确保 content 字段有值，如果为 None 则使用空列表
-        chat_messages = chat_window.content if chat_window.content else []
-        
         return ChatWindowDTO(
             id=chat_window.id,
             user_id=chat_window.user_id,
             summary=chat_window.summary,
-            chat_messages=chat_messages,
             created_at=chat_window.created_at,
             updated_at=chat_window.updated_at
         )

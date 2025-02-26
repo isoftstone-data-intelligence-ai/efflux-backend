@@ -239,14 +239,16 @@ class ChatService:
             并生成包含注释和代码的结构化内容。
         """
         # 构建新会话 content
-        content_user = ContentDTO(type="text", text=query)
+        content_user = [ContentDTO(type="text", text=query).model_dump()]
 
         # 新增会话信息记录 user
         await self.chat_message_dao.add_chat_message(chat_window_id, "user", content_user, None)
         # CodeInterpreterObjectDTO 对象
         object_dto = None
+        content_assistant = []
         # 判断 reply 是否为包含 JSON 的文本
         try:
+
             # 尝试从文本中提取 JSON 字符串
             json_str = reply.strip()
             if json_str.startswith("```json\n"):
@@ -263,14 +265,14 @@ class ChatService:
                 # 更新CodeInterpreterObjectDTO 对象
                 object_dto = CodeInterpreterObjectDTO(**code_interpreter_obj)
 
-                content_assistant = [content_commentary, content_code]
+                content_assistant.append([content_commentary.model_dump(), content_code.model_dump()])
             else:
                 # 如果不是完整的 CodeInterpreterObject 格式，使用默认文本格式
 
-                content_assistant = ContentDTO(type="text", text=reply)
+                content_assistant.append(ContentDTO(type="text", text=reply).model_dump())
         except (json.JSONDecodeError, AttributeError):
             # 如果不是 JSON 格式或字符串处理出错，使用默认文本格式
-            content_assistant = ContentDTO(type="text", text=reply)
+            content_assistant.append(ContentDTO(type="text", text=reply).model_dump())
 
         # 新增会话信息记录-assistant
         await self.chat_message_dao.add_chat_message(chat_window_id, "assistant", content_assistant, object_dto)
