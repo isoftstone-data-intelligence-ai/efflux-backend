@@ -45,7 +45,7 @@ TEMPLATES = [
         "provider": "Anthropic",
         "model_display_name": "claude-3.5-sonnet",
         "api_key_variable": "API Key",
-        "base_url_variable": "Base URL",
+        "base_url_variable": "",
         "model_variable": "Model",
     },
     {
