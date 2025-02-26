@@ -31,7 +31,7 @@ class ChatMessageDAO:
         async with self._session_factory() as session:
             query = select(ChatMessage).where(
                 ChatMessage.chat_window_id == chat_window_id
-            ).order_by(ChatMessage.created_at.desc())
+            ).order_by(ChatMessage.created_at.asc())
             
             result = await session.execute(query)
             messages = result.scalars().all()
