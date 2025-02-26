@@ -116,7 +116,7 @@ class ChatService:
                 self.user_history_dict[combined_id] = self.user_history_dict[combined_id][-3:]
 
                 # 更新会话历史记录
-                await self.update_chat_window_new(chat_dto.chat_id, user_query, assistant_reply)
+                await self.update_chat_window(chat_dto.chat_id, user_query, assistant_reply)
             for tool_call in collected_data["tool_calls"]:
                 print("--->tool_call:", tool_call)
 
