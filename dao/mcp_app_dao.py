@@ -137,7 +137,7 @@ class MCPAppDAO:
         async with self._session_factory() as session:
             return await Pagination.paginate(
                 session=session,
-                query=select(MCPApp),
+                query=select(MCPApp).order_by(MCPApp.id),
                 page=page,
                 page_size=page_size
             )
