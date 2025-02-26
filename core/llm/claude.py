@@ -32,8 +32,8 @@ class ClaudeLlm(LLMChat):
 
         Args:
             api_key (str): Anthropic API 密钥
-            base_url (str): API Base URL
-            model (str): 使用的模型名称 (如 "claude-3-opus-20240229")
+            base_url (str): API Base URL，其实不需要，但为了统一暂时不改变 function signature
+            model (str): 使用的模型名称 (如 "claude-3-5-sonnet-20241022")
 
         Returns:
             Optional[LanguageModelLike]: 返回一个 ChatAnthropic 实例，用于流式生成响应。
@@ -45,7 +45,6 @@ class ClaudeLlm(LLMChat):
         try:
             return ChatAnthropic(
                 anthropic_api_key=api_key,  # Anthropic API 密钥
-                base_url=base_url,          # API Base URL
                 model=model,                # 使用的模型名称
                 streaming=True,             # 启用流式响应
             )
