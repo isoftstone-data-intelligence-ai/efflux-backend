@@ -2,6 +2,7 @@ from core.llm.llm_manager import LLMManager
 from typing import AsyncGenerator, List, Optional
 from core.mcp.convert_mcp_tools import convert_mcp_to_langchain_tools
 from dao.artifacts_template_dao import ArtifactsTemplateDAO
+from dao.chat_message_dao import ChatMessageDAO
 from dao.chat_window_dao import ChatWindowDAO
 from dao.llm_config_dao import LlmConfigDAO
 from dto.artifacts_schema import ArtifactsSchema
@@ -23,7 +24,8 @@ class ChatService:
     """
 
     def __init__(self, mcp_config_service: MCPConfigService, chat_window_dao: ChatWindowDAO,
-                 llm_config_dao: LlmConfigDAO, artifacts_template_dao: ArtifactsTemplateDAO, llm_manager: LLMManager):
+                 chat_message_dao: ChatMessageDAO, llm_config_dao: LlmConfigDAO,
+                 artifacts_template_dao: ArtifactsTemplateDAO, llm_manager: LLMManager):
         """
         初始化 ChatService
 
@@ -41,6 +43,7 @@ class ChatService:
             user_history_dict (dict): 用于存储每个用户的历史会话记录
         """
         self.chat_window_dao = chat_window_dao
+        self.chat_message_dao = chat_message_dao
         self.llm_config_dao = llm_config_dao
         self.artifacts_template_dao = artifacts_template_dao
         self.mcp_config_service = mcp_config_service
@@ -113,7 +116,7 @@ class ChatService:
                 self.user_history_dict[combined_id] = self.user_history_dict[combined_id][-3:]
 
                 # 更新会话历史记录
-                await self.update_chat_window(chat_dto.chat_id, user_query, assistant_reply)
+                await self.update_chat_window_new(chat_dto.chat_id, user_query, assistant_reply)
             for tool_call in collected_data["tool_calls"]:
                 print("--->tool_call:", tool_call)
 
@@ -197,7 +200,10 @@ class ChatService:
         # summary_prompt = "根据会话记录总结出本次会话的概要"
         # summary_query = query + reply
         # summary = self.normal_chat(ChatDTO(prompt=summary_prompt, query=summary_query))
-        summary = query[:10]
+
+        # 使用字符串长度的最小值作为摘要
+        summary = query[:min(len(query), 100)]
+
         # 创建新的会话
         new_chat_window = await self.chat_window_dao.create_chat_window(user_id=user_id, summary=summary)
         return new_chat_window.id
@@ -215,6 +221,66 @@ class ChatService:
             ChatWindow: 包含完整会话历史的会话窗口对象
         """
         return await self.chat_window_dao.get_chat_window_by_id(chat_window_id)
+
+    async def update_chat_window_new(self, chat_window_id: int, query: str, reply: Optional[str] = None):
+        """
+        更新会话窗口内容
+
+        增量更新会话窗口的内容，添加新的用户查询和AI回复到会话历史中。
+        支持处理普通文本回复和代码解释器格式的回复。
+
+        Args:
+            chat_window_id (int): 会话窗口ID
+            query (str): 用户的查询内容
+            reply (Optional[str], optional): AI的回复内容。默认为 None。
+
+        Note:
+            当 reply 是 JSON 格式且包含特定字段时，会被解析为代码解释器对象，
+            并生成包含注释和代码的结构化内容。
+        """
+        # 构建新会话 content
+        content_user = ContentDTO(type="text", text=query)
+
+        # 新增会话信息记录 user
+        await self.chat_message_dao.add_chat_message(chat_window_id, "user", content_user, None)
+        # CodeInterpreterObjectDTO 对象
+        object_dto = None
+        # 判断 reply 是否为包含 JSON 的文本
+        try:
+            # 尝试从文本中提取 JSON 字符串
+            json_str = reply.strip()
+            if json_str.startswith("```json\n"):
+                json_str = json_str[8:]  # 移除 ```json\n
+            if json_str.endswith("\n```"):
+                json_str = json_str[:-4]  # 移除 \n```
+
+            code_interpreter_obj = json.loads(json_str)
+            if all(key in code_interpreter_obj for key in ["commentary", "template", "code"]):
+                # 创建文本类型的 ContentDTO（使用 commentary）
+                content_commentary = ContentDTO(type="text", text=code_interpreter_obj["commentary"])
+                # 创建代码类型的 ContentDTO（使用 code）
+                content_code = ContentDTO(type="code", text=code_interpreter_obj["code"])
+                # 更新CodeInterpreterObjectDTO 对象
+                object_dto = CodeInterpreterObjectDTO(**code_interpreter_obj)
+
+                content_assistant = [content_commentary, content_code]
+            else:
+                # 如果不是完整的 CodeInterpreterObject 格式，使用默认文本格式
+
+                content_assistant = ContentDTO(type="text", text=reply)
+        except (json.JSONDecodeError, AttributeError):
+            # 如果不是 JSON 格式或字符串处理出错，使用默认文本格式
+            content_assistant = ContentDTO(type="text", text=reply)
+
+        # 新增会话信息记录-assistant
+        await self.chat_message_dao.add_chat_message(chat_window_id, "assistant", content_assistant, object_dto)
+
+        # 更新会话窗口
+        await self.chat_window_dao.update_chat_window(
+            chat_window_id=chat_window_id,
+            summary=None,
+            content=None
+        )
 
     async def update_chat_window(self, chat_window_id: int, query: str, reply: Optional[str] = None):
         """

@@ -3,6 +3,7 @@ from core.llm.claude import ClaudeLlm
 from core.llm.llm_manager import LLMManager
 from core.llm.ollama import OllamaLlm
 from core.llm.open_ai import OpenAILlm
+from dao.chat_message_dao import ChatMessageDAO
 from dao.llm_config_dao import LlmConfigDAO
 from dao.llm_template_dao import LlmTemplateDAO
 from dao.mcp_app_dao import MCPAppDAO
@@ -39,6 +40,8 @@ class Container(containers.DeclarativeContainer):
     chat_window_dao = providers.Singleton(ChatWindowDAO, session_factory=database_provider.provided.session_factory)
     # 注册chat_window Service
     chat_window_service = providers.Singleton(ChatWindowService, chat_window_dao=chat_window_dao)
+    # 注册chat_message DAO
+    chat_message_dao = providers.Singleton(ChatMessageDAO, session_factory=database_provider.provided.session_factory)
 
     # 注册 artifacts_template DAO
     artifacts_template_dao = providers.Singleton(ArtifactsTemplateDAO, session_factory=database_provider.provided.session_factory)
@@ -72,6 +75,7 @@ class Container(containers.DeclarativeContainer):
     chat_service = providers.Singleton(ChatService,
                                        mcp_config_service=mcp_config_service,
                                        chat_window_dao=chat_window_dao,
+                                       chat_message_dao=chat_message_dao,
                                        llm_config_dao=llm_config_dao,
                                        artifacts_template_dao=artifacts_template_dao,
                                        llm_manager=llm_manager)
