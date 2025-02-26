@@ -1,12 +1,13 @@
 from typing import List
+
+from dao.chat_message_dao import ChatMessageDAO
 from dao.chat_window_dao import ChatWindowDAO
-from dto.chat_window_dto import ChatWindowDTO
+from dto.chat_window_dto import ChatWindowDTO, ContentDTO, CodeInterpreterObjectDTO, ChatMessageDTO
 from model.chat_window import ChatWindow
 
 
 class ChatWindowService:
-    def __init__(self, chat_window_dao: ChatWindowDAO, chat_message_dao: ChatWindowDAO):
-        self._session_factory = session_factory
+    def __init__(self, chat_window_dao: ChatWindowDAO, chat_message_dao: ChatMessageDAO):
         self.chat_window_dao = chat_window_dao
         self.chat_message_dao = chat_message_dao
 
@@ -24,7 +25,7 @@ class ChatWindowService:
         return await self.convert_models_to_chat_windows(result)
 
 
-    async def get_chat_window_by_id(self, chat_window_id: int) -> ChatWindowDTO:
+    async def get_chat_window_by_id(self, chat_window_id: int) -> ChatWindowDTO | None:
         # 获取聊天窗口基本信息
         chat_window = await self.chat_window_dao.get_chat_window_by_id(chat_window_id)
         if not chat_window:

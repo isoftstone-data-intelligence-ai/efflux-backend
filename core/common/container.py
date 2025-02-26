@@ -38,10 +38,10 @@ class Container(containers.DeclarativeContainer):
 
     # 注册chat_window DAO
     chat_window_dao = providers.Singleton(ChatWindowDAO, session_factory=database_provider.provided.session_factory)
-    # 注册chat_window Service
-    chat_window_service = providers.Singleton(ChatWindowService, chat_window_dao=chat_window_dao)
     # 注册chat_message DAO
     chat_message_dao = providers.Singleton(ChatMessageDAO, session_factory=database_provider.provided.session_factory)
+    # 注册chat_window Service
+    chat_window_service = providers.Singleton(ChatWindowService, chat_window_dao=chat_window_dao,chat_message_dao=chat_message_dao)
 
     # 注册 artifacts_template DAO
     artifacts_template_dao = providers.Singleton(ArtifactsTemplateDAO, session_factory=database_provider.provided.session_factory)
