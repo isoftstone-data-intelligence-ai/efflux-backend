@@ -41,8 +41,9 @@ Efflux 是一个基于大语言模型的 Agent 智能体对话客户端，提供
 
 
 
-### 在线演示
-您可以通过访问我们的[在线演示](http://47.236.204.213:3000/login)来体验Efflux的功能。
+### 在线体验
+- 🏠 [Efflux 官网](https://www.efflux.ai)
+- 🚀 [立即体验](https://www.efflux.ai/demo)
 
 
 

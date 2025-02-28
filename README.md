@@ -31,7 +31,8 @@ Efflux is an LLM-based Agent chat client featuring streaming responses and chat 
 - Chat history management
 
 ### Online Demo
-Experience Efflux in action through our [online demo](http://47.236.204.213:3000/login).
+- 🏠 [Efflux Homepage](https://www.efflux.ai)
+- 🚀 [Interactive Demo](https://www.efflux.ai/demo)
 
 
 ### Requirements
