@@ -1,6 +1,7 @@
 from langchain_core.tools import BaseTool, ToolException
 from typing import Type, List
 from jsonschema_pydantic import jsonschema_to_pydantic
+from mcp.client.sse import sse_client
 from pydantic import BaseModel
 from mcp import ClientSession, StdioServerParameters, types
 from mcp.client.stdio import stdio_client
@@ -23,13 +24,22 @@ def create_langchain_tool(
             raise NotImplementedError("Only async operations are supported")
 
         async def _arun(self, **kwargs):
-            async with stdio_client(self.mcp_server_params) as (read, write):
-                async with ClientSession(read, write) as session:
-                    await session.initialize()
-                    result = await session.call_tool(self.name, arguments=kwargs)
-                    if result.isError:
-                        raise ToolException(result.content)
-                    return result.content
+            if server_params.command == 'sse':
+                async with sse_client(f"{server_params.args[0]}") as (read, write):
+                    async with ClientSession(read, write) as session:
+                        await session.initialize()
+                        result = await session.call_tool(self.name, arguments=kwargs)
+                        if result.isError:
+                            raise ToolException(result.content)
+                        return result.content
+            else:
+                async with stdio_client(self.mcp_server_params) as (read, write):
+                    async with ClientSession(read, write) as session:
+                        await session.initialize()
+                        result = await session.call_tool(self.name, arguments=kwargs)
+                        if result.isError:
+                            raise ToolException(result.content)
+                        return result.content
 
     return McpTool()
 
@@ -45,15 +55,23 @@ async def convert_mcp_to_langchain_tools(server_params: List[StdioServerParamete
         #     for tool in cached_tools:
         #         langchain_tools.append(create_langchain_tool(tool, server_param))
         #     continue
+        if server_param.command == 'sse':
+            async with sse_client(f"{server_param.args[0]}") as (read, write):
+                async with ClientSession(read, write) as session:
+                    await session.initialize()
 
-        async with stdio_client(server_param) as (read, write):
-            async with ClientSession(read, write) as session:
-                print(f"Gathering capability of {server_param.command} {' '.join(server_param.args)}")
-                await session.initialize()
-                tools: types.ListToolsResult = await session.list_tools()
-                #save_tools_cache(server_param, tools.tools)
+                    tools: types.ListToolsRequest = await session.list_tools()
+                    for tool in tools.tools:
+                        langchain_tools.append(create_langchain_tool(tool, server_param))
+        else:
+            async with stdio_client(server_param) as (read, write):
+                async with ClientSession(read, write) as session:
+                    print(f"Gathering capability of {server_param.command} {' '.join(server_param.args)}")
+                    await session.initialize()
+                    tools: types.ListToolsResult = await session.list_tools()
+                    # save_tools_cache(server_param, tools.tools)
 
-                for tool in tools.tools:
-                    langchain_tools.append(create_langchain_tool(tool, server_param))
+                    for tool in tools.tools:
+                        langchain_tools.append(create_langchain_tool(tool, server_param))
 
     return langchain_tools

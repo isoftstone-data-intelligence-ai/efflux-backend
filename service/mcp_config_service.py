@@ -1,6 +1,6 @@
 import json
 from core.common.logger import get_logger
-from core.mcp.server.server_loader import StdioServerParameters
+from mcp import StdioServerParameters
 from dto.mcp_server_dto import MCPServerDTO, CreateMCPServerDTO
 from typing import List, Optional
 from dao.mcp_server_dao import MCPServerDAO
