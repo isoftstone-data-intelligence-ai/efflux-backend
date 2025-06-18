@@ -441,14 +441,14 @@ class ChatService:
                 
                 schema:{
                     "commentary": "I will generate a simple 'Hello World' application using the Next.js template. This will include a basic page that displays 'Hello World' when accessed.",
-                    "template": "nextjs-developer",
+                    "template": "agentsphere-nextjs-v1",
                     "title": "Hello World",
                     "description": "A simple Next.js app that displays 'Hello World'.",
                     "additional_dependencies": [],
                     "has_additional_dependencies": false,
                     "install_dependencies_command": "",
                     "port": 3000,
-                    "file_path": "pages/index.tsx",
+                    "file_path": "nextjs-project/src/pages/index.tsx",
                     "code": ""
                 }"""
         prompt_lines = []
