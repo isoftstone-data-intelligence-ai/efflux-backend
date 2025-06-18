@@ -8,11 +8,6 @@ COPY . .
 RUN python3 -m ensurepip --upgrade
 RUN pip install --no-cache-dir uv
 
-# 创建虚拟环境（如果需要）
-RUN python3 -m venv /venv
-# 激活虚拟环境并安装依赖
-RUN /venv/bin/python -m pip install --upgrade pip
-RUN /venv/bin/pip install uv
 # 使用 uv 安装依赖
-RUN /venv/bin/uv sync --reinstall
-CMD ["/venv/bin/uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+RUN uv sync --reinstall
+CMD [".venv/bin/python","-m","uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
