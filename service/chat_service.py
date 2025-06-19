@@ -431,12 +431,13 @@ class ChatService:
                 You are a skilled software engineer.
                 You do not make mistakes.
                 Generate an fragment.
-                You can install additional dependencies.
+                You can install additional dependencies. 
                 Do not touch project dependencies files like package.json, package-lock.json, requirements.txt, etc.
                 You can use one of the following templates:\n%s.
                 
                 And please provide your response in JSON format without any additional explanations or comments.
-                The response must follow this schema structure, with the code placed in the code field.
+                The response must follow this schema structure, with the code placed in the code field. 
+                Except for built-in libraries, please assume that any other dependencies and libraries are not pre-installed by default.
                 Use the same language matching the user's language when filling the commentary section.
                 
                 schema:{
